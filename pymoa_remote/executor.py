@@ -1,6 +1,6 @@
 import contextlib
 from typing import Dict, List, Any, Callable, Tuple, AsyncGenerator, Union, \
-    Iterable
+    Iterable, Optional
 import json
 import struct
 from itertools import accumulate
@@ -23,7 +23,9 @@ class ExecutorBase:
     """Executor that can be used to execute a method in a different context,
     e.g. in a different thread or across the network in a server.
 
-    It is not safe to be called concurrently.
+    It is not safe to be called concurrently, except execute/execute_generator.
+
+    TODO: test that all obj methods raise exception if called before ensure
     """
 
     name = 'Executor'
@@ -94,35 +96,42 @@ class ExecutorBase:
     async def get_remote_objects(self):
         raise NotImplementedError
 
-    async def get_remote_object_config(self, obj):
-        raise NotImplementedError
-
-    async def get_remote_object_data(self, obj, properties):
+    async def get_remote_object_config(self, obj: Optional[Any]):
         raise NotImplementedError
 
     async def apply_config_from_remote(self, obj):
         raise NotImplementedError
 
-    async def apply_data_from_remote(
-            self, obj, trigger_names: Iterable[str] = (),
-            triggered_logged_names: Iterable[str] = (),
-            logged_names: Iterable[str] = (), task_status=TASK_STATUS_IGNORED):
+    async def get_remote_object_property_data(
+            self, obj: Any, properties: List[str]) -> dict:
+        raise NotImplementedError
+
+    async def apply_property_data_from_remote(
+            self, obj: Any, properties: List[str]):
         raise NotImplementedError
 
     @contextlib.asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
-            logged_names: Iterable[str] = (), task_status=TASK_STATUS_IGNORED):
+            logged_names: Iterable[str] = (),
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
-    async def apply_execute_from_remote(
-            self, obj, exclude_self=True, task_status=TASK_STATUS_IGNORED):
+    async def apply_data_from_remote(
+            self, obj, trigger_names: Iterable[str] = (),
+            triggered_logged_names: Iterable[str] = (),
+            logged_names: Iterable[str] = (),
+            task_status=TASK_STATUS_IGNORED):
         raise NotImplementedError
 
     @contextlib.asynccontextmanager
     async def get_execute_from_remote(
             self, obj, task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+        raise NotImplementedError
+
+    async def apply_execute_from_remote(
+            self, obj, exclude_self=True, task_status=TASK_STATUS_IGNORED):
         raise NotImplementedError
 
     def encode(self, data):

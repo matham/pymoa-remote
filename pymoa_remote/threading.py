@@ -3,7 +3,7 @@
 """
 
 from typing import Tuple, AsyncGenerator, Union, Callable, Optional, Dict, \
-    List, Iterable
+    List, Iterable, Any
 import threading
 import math
 import queue as stdlib_queue
@@ -89,9 +89,9 @@ class ThreadExecutor(Executor):
 
         return await executor.execute(obj, fn, args, kwargs, callback)
 
-    async def execute_generator(self, obj, gen: Union[Callable, str], args=(),
-                                kwargs=None, callback: Union[
-                Callable, str] = None) -> AsyncGenerator:
+    async def execute_generator(
+            self, obj, gen: Union[Callable, str], args=(), kwargs=None,
+            callback: Union[Callable, str] = None) -> AsyncGenerator:
         if callback is not None and not isinstance(callback, str):
             callback = callback.__name__
 
@@ -139,37 +139,45 @@ class ThreadExecutor(Executor):
     async def get_remote_objects(self):
         return list(self.registry.hashed_instances.keys())
 
-    async def get_remote_object_config(self, obj):
+    async def get_remote_object_config(self, obj: Optional[Any]):
         if obj is not None:
             return read_config_from_object(obj)
         return {h: read_config_from_object(o)
                 for h, o in self.registry.hashed_instances.items()}
 
-    async def get_remote_object_data(self, obj, properties):
+    async def apply_config_from_remote(self, obj):
+        raise NotImplementedError
+
+    async def get_remote_object_property_data(
+            self, obj: Any, properties: List[str]) -> dict:
         return {k: getattr(obj, k) for k in properties}
 
-    async def apply_config_from_remote(self, obj):
-        apply_config(obj, read_config_from_object(obj))
-
-    async def apply_data_from_remote(
-            self, obj, trigger_names: Iterable[str] = (),
-            triggered_logged_names: Iterable[str] = (),
-            logged_names: Iterable[str] = (), task_status=TASK_STATUS_IGNORED):
+    async def apply_property_data_from_remote(
+            self, obj: Any, properties: List[str]):
         raise NotImplementedError
 
     @contextlib.asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
-            logged_names: Iterable[str] = (), task_status=TASK_STATUS_IGNORED):
+            logged_names: Iterable[str] = (),
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+        raise NotImplementedError
+
+    async def apply_data_from_remote(
+            self, obj, trigger_names: Iterable[str] = (),
+            triggered_logged_names: Iterable[str] = (),
+            logged_names: Iterable[str] = (),
+            task_status=TASK_STATUS_IGNORED):
+        raise NotImplementedError
+
+    @contextlib.asynccontextmanager
+    async def get_execute_from_remote(
+            self, obj, task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
     async def apply_execute_from_remote(
             self, obj, exclude_self=True, task_status=TASK_STATUS_IGNORED):
-        raise NotImplementedError
-
-    async def get_execute_from_remote(
-            self, obj, task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
 

@@ -1,4 +1,4 @@
-from typing import Optional, Any, List
+from typing import Optional, Any, List, Iterable
 import uuid
 import contextlib
 import trio
@@ -87,12 +87,28 @@ class Executor(ExecutorBase):
             'uuid': self._uuid,
         }
 
-    def _get_remote_object_data_data(self, obj: Any, properties: List[str]):
+    def _get_remote_object_property_data_data(
+            self, obj: Any, properties: List[str]):
         hash_name = self.registry.hashed_instances_ids[id(obj)]
 
         return {
             'hash_name': hash_name,
             'properties': properties,
+            'uuid': self._uuid,
+        }
+
+    def _get_remote_object_data_data(
+            self, obj: Any, trigger_names: Iterable[str] = (),
+            triggered_logged_names: Iterable[str] = (),
+            logged_names: Iterable[str] = ()):
+        hash_name = self.registry.hashed_instances_ids[id(obj)]
+
+        return {
+            'stream': 'data',
+            'hash_name': hash_name,
+            'trigger_names': trigger_names,
+            'triggered_logged_names': triggered_logged_names,
+            'logged_names': logged_names,
             'uuid': self._uuid,
         }
 
@@ -115,9 +131,19 @@ class Executor(ExecutorBase):
                     else:
                         setattr(obj, trigger_name, trigger_value)
 
+    def _get_remote_object_execute_data(self, obj: Any):
+        hash_name = self.registry.hashed_instances_ids[id(obj)]
+
+        return {
+            'stream': 'execute',
+            'hash_name': hash_name,
+            'uuid': self._uuid,
+        }
+
     async def _apply_execute_from_remote(self, obj, gen, exclude_self):
-        uuid = self._uuid
-        if exclude_self and uuid is None:
+        call_execute_callback = self.call_execute_callback
+        executor_uuid = self._uuid
+        if exclude_self and executor_uuid is None:
             raise ValueError('Cannot exclude self when uuid is not set')
 
         async with aclosing(gen) as aiter:
@@ -125,10 +151,10 @@ class Executor(ExecutorBase):
                 callback = data['callback']
                 return_value = data['return_value']
 
-                if exclude_self and uuid == data['uuid']:
+                if exclude_self and executor_uuid == data['uuid']:
                     continue
 
-                self.call_execute_callback(obj, return_value, callback)
+                call_execute_callback(obj, return_value, callback)
 
     def _get_clock_data(self) -> dict:
         return {}
