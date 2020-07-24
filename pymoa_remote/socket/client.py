@@ -174,11 +174,10 @@ class SocketExecutor(Executor):
 
     async def execute_generator(
             self, obj, gen: Union[Callable, str], args=(), kwargs=None,
-            callback: Union[Callable, str] = None) -> AsyncGenerator:
-        # todo: implement some kind of error recovery of reopening socket
+            callback: Union[Callable, str] = None,
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         read = self.read_decode_json_buffers
         write = self.write_socket
-        sock = self.socket
         raise_return_value = self.raise_return_value
         callback = self.get_execute_callback_func(obj, callback)
         call_callback = self.call_execute_callback_func
@@ -192,17 +191,25 @@ class SocketExecutor(Executor):
         }
         data = self.encode(data)
 
+        header = self.encode({})
         async with self._limiter:
-            await write(data, sock)
-            while True:
-                res = await read(sock)
-                raise_return_value(res, packet)
+            # it needs to be its own socket so that we can close it from our
+            # side and stop reading
+            async with self.create_socket_context() as sock:
+                await write(header, sock)
+                await read(sock)
 
-                if res['done_execute']:
-                    return
-                ret_val = res['data']
-                call_callback(ret_val, callback)
-                yield ret_val
+                await write(data, sock)
+                task_status.started()
+                while True:
+                    res = await read(sock)
+                    raise_return_value(res, packet)
+
+                    if res['done_execute']:
+                        return
+                    ret_val = res['data']
+                    call_callback(ret_val, callback)
+                    yield ret_val
 
     async def get_remote_objects(self):
         res = await self._vanilla_write_read(
