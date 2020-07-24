@@ -7,11 +7,40 @@ from functools import wraps, partial
 from asyncio import iscoroutinefunction
 from inspect import isgeneratorfunction, isasyncgenfunction
 from tree_config import read_config_from_object
+from contextvars import ContextVar
 
 from pymoa_remote.executor import ExecutorBase, InstanceRegistry
 
 __all__ = (
-    'Executor', 'apply_executor', 'apply_generator_executor', 'LocalRegistry')
+    'ExecutorContext', 'apply_executor', 'apply_generator_executor',
+    'Executor', 'LocalRegistry')
+
+
+current_executor: ContextVar[Optional['Executor']] = ContextVar(
+    'current_executor', default=None)
+
+
+class ExecutorContext:
+    # todo: use this in decorator
+
+    executor: 'Executor'
+
+    token = None
+
+    def __init__(self, executor: 'Executor', **kwargs):
+        super().__init__(**kwargs)
+        self.executor = executor
+
+    def __enter__(self):
+        if self.token is not None:
+            raise TypeError('Cannot enter ExecutorContext recursively')
+
+        self.token = current_executor.set(self.executor)
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        current_executor.reset(self.token)
+        self.token = None
 
 
 class Executor(ExecutorBase):
