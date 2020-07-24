@@ -15,6 +15,15 @@ class ExecutorServerBase:
     execution.
     """
 
+    stream_changes = True
+
+    def __init__(self, stream_changes=True, **kwargs):
+        super().__init__(**kwargs)
+        # todo: document the channels and ensure all remotes have them
+        # todo: order may not be in the order the events happened
+        # todo: maybe make object creation/deletion and execution thread safe
+        self.stream_changes = stream_changes
+
     async def ensure_instance(self, *args, **kwargs):
         raise NotImplementedError
 
@@ -27,10 +36,25 @@ class ExecutorServerBase:
     async def execute_generator(self, *args, **kwargs):
         raise NotImplementedError
 
+    async def get_objects(self, *args, **kwargs):
+        raise NotImplementedError
+
     async def get_object_config(self, *args, **kwargs):
         raise NotImplementedError
 
     async def get_object_data(self, *args, **kwargs):
+        raise NotImplementedError
+
+    async def start_logging_object_data(self, *args, **kwargs):
+        raise NotImplementedError
+
+    async def stop_logging_object_data(self, *args, **kwargs):
+        raise NotImplementedError
+
+    async def get_echo_clock(self, *args, **kwargs):
+        raise NotImplementedError
+
+    def post_stream_channel(self, data, channel, hash_name):
         raise NotImplementedError
 
     def encode(self, data):
@@ -50,11 +74,14 @@ class ExecutorServer(ExecutorServerBase):
 
     stream_data_logger: 'DataLogger' = None
 
-    def __init__(self, registry: 'RemoteRegistry' = None, **kwargs):
+    def __init__(
+            self, registry: 'RemoteRegistry' = None,
+            executor: ExecutorBase = None, **kwargs):
         super(ExecutorServer, self).__init__(**kwargs)
         if registry is None:
             registry = RemoteRegistry()
         self.registry = registry
+        self.executor = executor
 
         self.stream_data_logger = DataLogger()
 
@@ -74,52 +101,66 @@ class ExecutorServer(ExecutorServerBase):
     def decode(self, data):
         return self.registry.decode_json(data)
 
-    async def _create_instance(self, data: dict) -> Tuple[Any, dict]:
+    async def _create_instance(self, data: dict) -> Any:
         hash_name = data['hash_name']
         triple = data['cls_name'], data['module'], data['qual_name']
-        args = data['args']
-        kwargs = data['kwargs']
-        config = data['config']
+        args = data.pop('args')
+        kwargs = data.pop('kwargs')
+        config = data.pop('config')
 
         obj = self.registry.create_instance(
             triple, hash_name, args, kwargs, config)
         await self.executor.ensure_remote_instance(obj, *args, **kwargs)
-        return obj, data
 
-    async def _delete_instance(self, data: dict) -> Tuple[Any, dict]:
+        if self.stream_changes:
+            self.post_stream_channel(data, 'ensure', hash_name)
+        return obj
+
+    async def _delete_instance(self, data: dict) -> Any:
         hash_name = data['hash_name']
         obj = self.registry.delete_instance(hash_name)
         await self.executor.delete_remote_instance(obj)
-        return obj, data
 
-    async def _execute(self, data: dict) -> Tuple[Any, dict]:
+        if self.stream_changes:
+            self.post_stream_channel(data, 'delete', hash_name)
+        return obj
+
+    async def _execute(self, data: dict) -> Any:
+        hash_name = data['hash_name']
         method_name = data['method_name']
         args = data.pop('args')
         kwargs = data.pop('kwargs')
-        callback = data['callback']
 
-        obj = self.registry.get_instance(data['hash_name'])
+        obj = self.registry.get_instance(hash_name)
 
-        res = await self.executor.execute(
-            obj, getattr(obj, method_name), args, kwargs, callback)
+        res = await getattr(obj, method_name)(*args, **kwargs)
         data['return_value'] = res
 
-        return res, data
+        if self.stream_changes:
+            self.post_stream_channel(data, 'execute', hash_name)
+
+        return res
 
     async def _execute_generator(self, data: dict):
+        hash_name = data['hash_name']
         method_name = data['method_name']
         args = data.pop('args')
         kwargs = data.pop('kwargs')
-        callback = data['callback']
 
-        obj = self.registry.get_instance(data['hash_name'])
-        gen = self.executor.execute_generator(
-            obj, getattr(obj, method_name), args, kwargs, callback)
+        post_stream = None
+        if self.stream_changes:
+            post_stream = self.post_stream_channel
+
+        obj = self.registry.get_instance(hash_name)
+        gen = getattr(obj, method_name)(*args, **kwargs)
 
         async with aclosing(gen) as aiter:
             async for res in aiter:
                 data['return_value'] = res
-                yield res, data
+
+                if post_stream is not None:
+                    post_stream(data, 'execute', hash_name)
+                yield res
 
     async def _get_objects(self, data: dict) -> List[str]:
         return list(self.registry.hashed_instances.keys())

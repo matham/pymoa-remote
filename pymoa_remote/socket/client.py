@@ -216,6 +216,10 @@ class SocketExecutor(Executor):
         )
         return res['data']
 
+    async def apply_config_from_remote(self, obj):
+        config = await self.get_remote_object_config(obj)
+        apply_config(obj, config)
+
     async def get_remote_object_property_data(
             self, obj: Any, properties: List[str]) -> dict:
         res = await self._vanilla_write_read(
@@ -223,10 +227,6 @@ class SocketExecutor(Executor):
             self._get_remote_object_property_data_data(obj, properties)
         )
         return res['data']
-
-    async def apply_config_from_remote(self, obj):
-        config = await self.get_remote_object_config(obj)
-        apply_config(obj, config)
 
     async def apply_property_data_from_remote(
             self, obj: Any, properties: List[str]):

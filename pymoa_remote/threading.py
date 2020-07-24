@@ -91,7 +91,10 @@ class ThreadExecutor(Executor):
 
     async def execute_generator(
             self, obj, gen: Union[Callable, str], args=(), kwargs=None,
-            callback: Union[Callable, str] = None) -> AsyncGenerator:
+            callback: Union[Callable, str] = None,
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+        task_status.started()
+
         if callback is not None and not isinstance(callback, str):
             callback = callback.__name__
 
