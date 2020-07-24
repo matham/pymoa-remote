@@ -148,6 +148,8 @@ class ExecutorServer(ExecutorServerBase):
         return {k: getattr(obj, k) for k in properties}
 
     def _start_logging_object_data(self, data: dict, log_callback: Callable):
+        """TODO: Needs to be able to handle cross-thread requests.
+        """
         trigger_names = data['trigger_names']
         triggered_logged_names = data['triggered_logged_names']
         logged_names = data['logged_names']

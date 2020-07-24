@@ -172,8 +172,9 @@ class ThreadExecutor(Executor):
         raise NotImplementedError
 
     @contextlib.asynccontextmanager
-    async def get_execute_from_remote(
-            self, obj, task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+    async def get_channel_from_remote(
+            self, obj: Optional[Any], channel: str,
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
     async def apply_execute_from_remote(

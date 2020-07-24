@@ -281,9 +281,10 @@ class SocketExecutor(Executor):
             obj, self._generate_stream_events(data, task_status))
 
     @contextlib.asynccontextmanager
-    async def get_execute_from_remote(
-            self, obj, task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
-        data = self._get_remote_object_execute_data(obj)
+    async def get_channel_from_remote(
+            self, obj: Optional[Any], channel: str,
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+        data = self._get_remote_object_channel_data(obj, channel)
 
         async with aclosing(self._generate_stream_events(
                 data, task_status)) as aiter:
@@ -291,7 +292,7 @@ class SocketExecutor(Executor):
 
     async def apply_execute_from_remote(
             self, obj, exclude_self=True, task_status=TASK_STATUS_IGNORED):
-        data = self._get_remote_object_execute_data(obj)
+        data = self._get_remote_object_channel_data(obj, 'execute')
 
         await self._apply_execute_from_remote(
             obj, self._generate_stream_events(data, task_status), exclude_self)

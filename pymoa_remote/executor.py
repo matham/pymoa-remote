@@ -26,6 +26,7 @@ class ExecutorBase:
     It is not safe to be called concurrently, except execute/execute_generator.
 
     TODO: test that all obj methods raise exception if called before ensure
+    TODO: an error should be raised if using executor outside with block
     """
 
     name = 'Executor'
@@ -48,7 +49,8 @@ class ExecutorBase:
 
     async def execute_generator(
             self, obj, gen: Union[Callable, str], args=(), kwargs=None,
-            callback: Union[Callable, str] = None) -> AsyncGenerator:
+            callback: Union[Callable, str] = None,
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
     @classmethod
@@ -126,8 +128,9 @@ class ExecutorBase:
         raise NotImplementedError
 
     @contextlib.asynccontextmanager
-    async def get_execute_from_remote(
-            self, obj, task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+    async def get_channel_from_remote(
+            self, obj: Optional[Any], channel: str,
+            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
     async def apply_execute_from_remote(

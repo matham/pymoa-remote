@@ -160,11 +160,18 @@ class Executor(ExecutorBase):
                     else:
                         setattr(obj, trigger_name, trigger_value)
 
-    def _get_remote_object_execute_data(self, obj: Any):
-        hash_name = self.registry.hashed_instances_ids[id(obj)]
+    def _get_remote_object_channel_data(self, obj: Any, channel: str):
+        if channel not in {'ensure', 'delete', 'execute'}:
+            raise ValueError(
+                f'Unrecognized channel {channel}. '
+                f'Must be one of ensure, delete, execute')
+
+        hash_name = None
+        if obj is not None:
+            hash_name = self.registry.hashed_instances_ids[id(obj)]
 
         return {
-            'stream': 'execute',
+            'stream': channel,
             'hash_name': hash_name,
             'uuid': self._uuid,
         }
