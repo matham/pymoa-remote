@@ -9,8 +9,12 @@ from trio import TASK_STATUS_IGNORED
 import base64
 
 __all__ = (
-    'NO_CALLBACK', 'ExecutorBase', 'InstanceRegistry',
+    'RemoteException', 'NO_CALLBACK', 'ExecutorBase', 'InstanceRegistry',
     'ReferenceableMetaclass')
+
+
+class RemoteException(Exception):
+    pass
 
 
 NO_CALLBACK = '#@none'
@@ -89,6 +93,12 @@ class ExecutorBase:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.stop_executor()
 
+    async def remote_import(self, module):
+        raise NotImplementedError
+
+    async def register_remote_class(self, cls):
+        raise NotImplementedError
+
     async def ensure_remote_instance(self, obj, hash_name, *args, **kwargs):
         raise NotImplementedError
 
@@ -117,6 +127,7 @@ class ExecutorBase:
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
@@ -124,6 +135,7 @@ class ExecutorBase:
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED):
         raise NotImplementedError
 
@@ -228,6 +240,19 @@ class InstanceRegistry:
 
         decoder = partial(self.referenceable_json_decoder, buffers=buffers)
         return json.loads(json_msg, object_hook=decoder)
+
+    def decode_json_buffers_raw(self, data: bytes):
+        if len(data) < 16:
+            raise ValueError('Unable to parse message header')
+
+        msg_len, json_bytes, num_buffers = self.decode_json_buffers_header(
+            data[:16])
+
+        data = data[16:]
+        if len(data) != msg_len:
+            raise ValueError('Unable to parse message data')
+
+        return self.decode_json_buffers(data, json_bytes, num_buffers)
 
     def encode_json_func(self, obj, buffers: list = None):
         hash_val = self.hashed_instances_ids.get(id(obj), None)

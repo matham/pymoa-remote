@@ -12,7 +12,8 @@ from trio import socket, SocketStream, TASK_STATUS_IGNORED, open_tcp_stream
 from tree_config import apply_config
 
 from pymoa_remote.client import Executor
-from pymoa_remote.executor import NO_CALLBACK
+from pymoa_remote.executor import NO_CALLBACK, RemoteException
+from pymoa_remote.exception import get_traceback_from_frames
 
 __all__ = ('SocketExecutor', )
 
@@ -112,6 +113,11 @@ class SocketExecutor(Executor):
         return self.registry.decode_json_buffers(data, json_bytes, num_buffers)
 
     def raise_return_value(self, data: dict, packet: int = None):
+        exception = data.get('exception', None)
+        if exception is not None:
+            raise RemoteException from RemoteException().with_traceback(
+                get_traceback_from_frames(exception['frames']))
+
         # todo: implement reading errors when server fails
         if packet is not None:
             packet_ = data['packet']
@@ -134,6 +140,14 @@ class SocketExecutor(Executor):
         self.raise_return_value(res, packet)
 
         return res
+
+    async def remote_import(self, module):
+        data = self._get_remote_import_data(module)
+        await self._vanilla_write_read('remote_import', data)
+
+    async def register_remote_class(self, cls):
+        data = self._get_register_remote_class_data(cls)
+        await self._vanilla_write_read('register_remote_class', data)
 
     async def ensure_remote_instance(self, obj, hash_name, *args, **kwargs):
         self.registry.add_instance(obj, hash_name)
@@ -253,7 +267,12 @@ class SocketExecutor(Executor):
             last_packet = None
             while True:
                 res = await read(stream)
-                data = res['data']
+
+                exception = res.get('exception', None)
+                if exception is not None:
+                    raise RemoteException from RemoteException(
+                        ).with_traceback(
+                        get_traceback_from_frames(exception['frames']))
 
                 packet = res['packet']
                 if last_packet is not None and last_packet + 1 != packet:
@@ -261,16 +280,21 @@ class SocketExecutor(Executor):
                         f'Packets were skipped {last_packet} -> {packet}')
                 last_packet = packet
 
-                yield data
+                raw_res = res['data']
+                assert type(raw_res) == bytes
+                yield self.registry.decode_json_buffers_raw(raw_res)
 
     @contextlib.asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         data = self._get_remote_object_data_data(
-            obj, trigger_names, triggered_logged_names, logged_names)
+            obj, trigger_names, triggered_logged_names, logged_names,
+            initial_properties)
+        data = {'stream': 'data', 'data': data}
 
         async with aclosing(self._generate_stream_events(
                 data, task_status)) as aiter:
@@ -280,9 +304,12 @@ class SocketExecutor(Executor):
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED):
         data = self._get_remote_object_data_data(
-            obj, trigger_names, triggered_logged_names, logged_names)
+            obj, trigger_names, triggered_logged_names, logged_names,
+            initial_properties)
+        data = {'stream': 'data', 'data': data}
 
         await self._apply_data_from_remote(
             obj, self._generate_stream_events(data, task_status))
@@ -292,6 +319,7 @@ class SocketExecutor(Executor):
             self, obj: Optional[Any], channel: str,
             task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         data = self._get_remote_object_channel_data(obj, channel)
+        data = {'stream': channel, 'data': data}
 
         async with aclosing(self._generate_stream_events(
                 data, task_status)) as aiter:
@@ -300,6 +328,7 @@ class SocketExecutor(Executor):
     async def apply_execute_from_remote(
             self, obj, exclude_self=True, task_status=TASK_STATUS_IGNORED):
         data = self._get_remote_object_channel_data(obj, 'execute')
+        data = {'stream': 'execute', 'data': data}
 
         await self._apply_execute_from_remote(
             obj, self._generate_stream_events(data, task_status), exclude_self)

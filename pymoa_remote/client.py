@@ -63,6 +63,27 @@ class Executor(ExecutorBase):
     def decode(self, data):
         return self.registry.decode_json(data)
 
+    def _get_remote_import_data(self, module):
+        if not isinstance(module, str):
+            module = module.__name__
+
+        return {
+            'module': module,
+            'uuid': self._uuid,
+        }
+
+    def _get_register_remote_class_data(self, cls):
+        if cls.__name__ != cls.__qualname__:
+            raise TypeError(f'Cannot register {cls}. Can only register module '
+                            f'level classes')
+
+        return {
+            'cls_name': cls.__name__,
+            'module': cls.__module__,
+            'qual_name': cls.__qualname__,
+            'uuid': self._uuid,
+        }
+
     def _get_ensure_remote_instance_data(self, obj, args, kwargs, hash_name):
         return {
             'cls_name': obj.__class__.__name__,
@@ -129,21 +150,33 @@ class Executor(ExecutorBase):
     def _get_remote_object_data_data(
             self, obj: Any, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
-            logged_names: Iterable[str] = ()):
+            logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = ()):
         hash_name = self.registry.hashed_instances_ids[id(obj)]
 
         return {
-            'stream': 'data',
             'hash_name': hash_name,
             'trigger_names': trigger_names,
             'triggered_logged_names': triggered_logged_names,
             'logged_names': logged_names,
+            'initial_properties': initial_properties,
             'uuid': self._uuid,
         }
 
     async def _apply_data_from_remote(self, obj, gen):
+        initial = True
         async with aclosing(gen) as aiter:
             async for data in aiter:
+                if initial:
+                    initial = False
+
+                    if 'initial_properties' in data:
+                        for key, value in data['initial_properties'].items():
+                            if key.startswith('on_'):
+                                obj.dispatch(key, obj, *value)
+                            else:
+                                setattr(obj, key, value)
+
                 trigger_name = data['logged_trigger_name']
                 trigger_value = data['logged_trigger_value']
                 props = data['logged_items']
@@ -161,17 +194,16 @@ class Executor(ExecutorBase):
                         setattr(obj, trigger_name, trigger_value)
 
     def _get_remote_object_channel_data(self, obj: Any, channel: str):
-        if channel not in {'ensure', 'delete', 'execute'}:
+        if channel not in {'ensure', 'delete', 'execute', ''}:
             raise ValueError(
                 f'Unrecognized channel {channel}. '
                 f'Must be one of ensure, delete, execute')
 
-        hash_name = None
+        hash_name = ''
         if obj is not None:
             hash_name = self.registry.hashed_instances_ids[id(obj)]
 
         return {
-            'stream': channel,
             'hash_name': hash_name,
             'uuid': self._uuid,
         }

@@ -1,13 +1,17 @@
 from typing import Dict, List, Any, Callable, Tuple, Set, AsyncGenerator, \
     Iterable, Optional
 from async_generator import aclosing
+import importlib
 import time
+from itertools import chain
 from tree_config import apply_config, read_config_from_object
 
 from pymoa_remote.executor import InstanceRegistry, ExecutorBase
+from pymoa_remote.utils import MaxSizeErrorDeque
 
 __all__ = (
-    'ExecutorServerBase', 'ExecutorServer', 'DataLogger', 'RemoteRegistry')
+    'ExecutorServerBase', 'ExecutorServer', 'SimpleExecutorServer',
+    'DataLogger', 'RemoteRegistry', 'dispatch_stream_channel_to_queues')
 
 
 class ExecutorServerBase:
@@ -17,12 +21,24 @@ class ExecutorServerBase:
 
     stream_changes = True
 
-    def __init__(self, stream_changes=True, **kwargs):
+    allow_remote_class_registration = True
+
+    def __init__(
+            self, stream_changes=True, allow_remote_class_registration=True,
+            **kwargs):
         super().__init__(**kwargs)
         # todo: document the channels and ensure all remotes have them
         # todo: order may not be in the order the events happened
-        # todo: maybe make object creation/deletion and execution thread safe
+        # todo: maybe make object creation/deletion/enumeration and execution
+        #  thread safe
         self.stream_changes = stream_changes
+        self.allow_remote_class_registration = allow_remote_class_registration
+
+    async def remote_import(self, *args, **kwargs):
+        raise NotImplementedError
+
+    async def register_remote_class(self, *args, **kwargs):
+        raise NotImplementedError
 
     async def ensure_instance(self, *args, **kwargs):
         raise NotImplementedError
@@ -101,6 +117,25 @@ class ExecutorServer(ExecutorServerBase):
     def decode(self, data):
         return self.registry.decode_json(data)
 
+    async def _remote_import(self, data: dict) -> Any:
+        module = data['module']
+        importlib.import_module(module)
+
+    async def _register_remote_class(self, data: dict) -> Any:
+        cls_name = data['cls_name']
+        module = data['module']
+        qual_name = data['qual_name']
+
+        if cls_name != qual_name:
+            raise TypeError(
+                f'Cannot register {cls_name}. Can only register module '
+                f'level classes')
+
+        mod = importlib.import_module(module)
+        cls = getattr(mod, cls_name)
+        self.registry.register_class(cls)
+        await self.executor.register_remote_class(cls)
+
     async def _create_instance(self, data: dict) -> Any:
         hash_name = data['hash_name']
         triple = data['cls_name'], data['module'], data['qual_name']
@@ -136,6 +171,8 @@ class ExecutorServer(ExecutorServerBase):
         res = await getattr(obj, method_name)(*args, **kwargs)
         data['return_value'] = res
 
+        # need to stream immediately before the lock is released so streaming
+        # order matches execution order
         if self.stream_changes:
             self.post_stream_channel(data, 'execute', hash_name)
 
@@ -195,18 +232,67 @@ class ExecutorServer(ExecutorServerBase):
         triggered_logged_names = data['triggered_logged_names']
         logged_names = data['logged_names']
         hash_name = data['hash_name']
+        initial_properties = data['initial_properties']
 
         obj = self.registry.get_instance(hash_name)
-        binding = self.stream_data_logger.start_logging(
+        return self.stream_data_logger.start_logging(
             log_callback, obj, hash_name, trigger_names,
-            triggered_logged_names, logged_names)
-        return binding
+            triggered_logged_names, logged_names, initial_properties)
 
     def _stop_logging_object_data(self, binding):
         self.stream_data_logger.stop_logging(*binding)
 
     def _get_clock_data(self, data: dict) -> dict:
         return {'server_time': time.perf_counter_ns()}
+
+
+class SimpleExecutorServer(ExecutorServer):
+
+    async def remote_import(self, data: dict):
+        await self._remote_import(data)
+
+    async def register_remote_class(self, data: dict):
+        await self._register_remote_class(data)
+
+    async def ensure_instance(self, data: dict) -> None:
+        hash_name = data['hash_name']
+        if hash_name in self.registry.hashed_instances:
+            return
+
+        await self._create_instance(data)
+
+    async def delete_instance(self, data: dict) -> None:
+        hash_name = data['hash_name']
+        if hash_name not in self.registry.hashed_instances:
+            return
+
+        await self._delete_instance(data)
+
+    async def execute(self, data: dict):
+        return await self._execute(data)
+
+    async def execute_generator(self, data: dict):
+        async with aclosing(self._execute_generator(data)) as aiter:
+            async for res in aiter:
+                yield res
+
+    async def get_objects(self, data: dict):
+        return await self._get_objects(data)
+
+    async def get_object_config(self, data: dict):
+        return await self._get_object_config(data)
+
+    async def get_object_data(self, data: dict):
+        return await self._get_object_data(data)
+
+    async def start_logging_object_data(self, data: dict, log_callback):
+        return self._start_logging_object_data(data, log_callback)
+
+    async def stop_logging_object_data(self, binding):
+        self._stop_logging_object_data(binding)
+
+    async def get_echo_clock(self, data: dict):
+        return self._get_clock_data(data)
 
 
 class DataLogger:
@@ -217,7 +303,8 @@ class DataLogger:
             self, callback: Callable, obj: Any, hash_name: str,
             trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
-            logged_names: Iterable[str] = ()):
+            logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = ()):
         """logged_names cannot have events if trigger is not empty.
 
         Can't have prop bound as trigger and as name without trigger
@@ -249,7 +336,16 @@ class DataLogger:
                     name, self.log_trigger_property_callback, name,
                     tracked_props, hash_name, callback)
             add_uid((name, uid))
-        return obj, binding
+
+        initial = {
+            'logged_trigger_name': None,
+            'logged_trigger_value': None,
+            'logged_items': {},
+            'initial_properties': {
+                k: getattr(obj, k) for k in initial_properties},
+            'hash_name': hash_name,
+        }
+        return (obj, binding), initial
 
     def stop_logging(self, obj, binding):
         unbind_uid = obj.unbind_uid
@@ -312,3 +408,22 @@ class RemoteRegistry(InstanceRegistry):
 
     def get_instance(self, hash_name: str):
         return self.hashed_instances[hash_name]
+
+
+def dispatch_stream_channel_to_queues(
+        data: dict, channel: str, hash_name: str,
+        stream_clients: Dict[Tuple[str, str], Dict[Any, MaxSizeErrorDeque]],
+        encode: Callable):
+    queues = []
+    for hash_key in ((channel, hash_name), (channel, ''), ('', hash_name),
+                     ('', '')):
+        if hash_key in stream_clients:
+            queues.append(stream_clients[hash_key].values())
+
+    client_queues: List[MaxSizeErrorDeque] = list(chain(*queues))
+    if client_queues:
+        encoded_data = encode(data)
+
+        for queue in client_queues:
+            queue.add_item(
+                (encoded_data, channel, hash_name), len(encoded_data))

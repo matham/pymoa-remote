@@ -3,8 +3,10 @@
 
 """
 from trio import socket
+import trio
 import sys
 import subprocess
+from typing import Optional
 
 from pymoa_remote.socket.client import SocketExecutor
 
@@ -15,6 +17,8 @@ class MultiprocessSocketExecutor(SocketExecutor):
     """Executor that sends all requests to a remote server to be executed
     there, using a websocket.
     """
+
+    _process: Optional[trio.Process] = None
 
     server: str = ''
 
@@ -29,6 +33,9 @@ class MultiprocessSocketExecutor(SocketExecutor):
         raise NotImplementedError
 
     async def start_executor(self):
+        if self._process is not None:
+            raise TypeError('Executor already started')
+
         port = self.port
         if not port:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -37,7 +44,7 @@ class MultiprocessSocketExecutor(SocketExecutor):
             port = self.port = s.getsockname()[1]
             await s.aclose()
 
-        subprocess.Popen(
+        self._process = await trio.open_process(
             [sys.executable, '-m', 'pymoa.executor.remote.app.multiprocessing',
              '--port', str(port)])
         await super(MultiprocessSocketExecutor, self).start_executor()
@@ -46,6 +53,12 @@ class MultiprocessSocketExecutor(SocketExecutor):
         await super(MultiprocessSocketExecutor, self).stop_executor(
             block=block)
 
+        if self._process is None:
+            return
+
         data = self.encode({'eof': True})
         async with self.create_socket_context() as sock:
             await self.write_socket(data, sock)
+
+        await self._process.aclose()
+        self._process = None

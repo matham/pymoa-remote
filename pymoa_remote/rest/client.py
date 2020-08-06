@@ -15,7 +15,8 @@ from tree_config import apply_config
 
 from pymoa_remote.rest import SSEStream
 from pymoa_remote.client import Executor
-from pymoa_remote.executor import NO_CALLBACK
+from pymoa_remote.executor import NO_CALLBACK, RemoteException
+from pymoa_remote.exception import get_traceback_from_frames
 
 __all__ = ('RestExecutor', )
 
@@ -59,26 +60,55 @@ class RestExecutor(Executor):
             uri = uri[:-1]
         self.uri = uri
 
+    async def _vanilla_write_read(
+            self, path_suffix: str, data: dict, method: str) -> dict:
+        data = self.encode(data)
+
+        uri = f'{self.uri}/api/v1/{path_suffix}'
+        meth = getattr(self._session, method)
+        response = await meth(
+            uri, data=data, headers={'Content-Type': 'application/json'})
+        response.raise_for_status()
+
+        res = self.decode(response.text)
+
+        exception = res.get('exception', None)
+        if exception is not None:
+            raise RemoteException from RemoteException().with_traceback(
+                get_traceback_from_frames(exception['frames']))
+
+        return res
+
+    async def remote_import(self, module):
+        await self._vanilla_write_read(
+            'objects/import',
+            self._get_remote_import_data(module),
+            'post'
+        )
+
+    async def register_remote_class(self, cls):
+        await self._vanilla_write_read(
+            'objects/register_class',
+            self._get_register_remote_class_data(cls),
+            'post'
+        )
+
     async def ensure_remote_instance(self, obj, hash_name, *args, **kwargs):
         self.registry.add_instance(obj, hash_name)
 
-        data = self._get_ensure_remote_instance_data(
-            obj, args, kwargs, hash_name)
-        data = self.encode(data)
-
-        uri = f'{self.uri}/api/v1/objects/create_open'
-        response = await self._session.post(
-            uri, data=data, headers={'Content-Type': 'application/json'})
-        response.raise_for_status()
+        await self._vanilla_write_read(
+            'objects/create_open',
+            self._get_ensure_remote_instance_data(
+                obj, args, kwargs, hash_name),
+            'post'
+        )
 
     async def delete_remote_instance(self, obj):
-        data = self._get_delete_remote_instance_data(obj)
-        data = self.encode(data)
-
-        uri = f'{self.uri}/api/v1/objects/delete'
-        response = await self._session.post(
-            uri, data=data, headers={'Content-Type': 'application/json'})
-        response.raise_for_status()
+        await self._vanilla_write_read(
+            'objects/delete',
+            self._get_delete_remote_instance_data(obj),
+            'post'
+        )
 
         self.registry.delete_instance(obj)
 
@@ -94,18 +124,15 @@ class RestExecutor(Executor):
             self, obj, fn: Union[Callable, str], args=(), kwargs=None,
             callback: Union[Callable, str] = None):
         data = self._get_execute_data(obj, fn, args, kwargs, callback)
-        data = self.encode(data)
 
-        uri = f'{self.uri}/api/v1/objects/execute'
         async with self._limiter:
-            response = await self._session.post(
-                uri, data=data, headers={'Content-Type': 'application/json'})
-            response.raise_for_status()
+            res = await self._vanilla_write_read(
+                'objects/execute', data, 'post')
 
-            res = self.decode(response.text)
+            ret_val = res['data']
             if callback is not NO_CALLBACK:
-                self.call_execute_callback(obj, res, callback)
-        return res
+                self.call_execute_callback(obj, ret_val, callback)
+        return ret_val
 
     async def execute_generator(
             self, obj, gen: Union[Callable, str], args=(), kwargs=None,
@@ -127,41 +154,43 @@ class RestExecutor(Executor):
             raise_for_status(response)
 
             async with response.body() as response_body:
+                # todo: move this and everywhere else it's used to after we
+                #  bound or the generator started
                 task_status.started()
                 async for _, data, id_, _ in SSEStream.stream(response_body):
                     data = decode(data)
                     if data == 'alive':
                         continue
 
+                    exception = data.get('exception', None)
+                    if exception is not None:
+                        raise RemoteException from RemoteException(
+                            ).with_traceback(
+                                get_traceback_from_frames(exception['frames']))
+
                     done_execute = decode(id_)
                     if done_execute:
                         return
 
-                    return_value = data['return_value']
+                    return_value = data['data']
                     call_callback(return_value, callback)
                     yield return_value
 
     async def get_remote_objects(self):
-        data = self._get_remote_objects_data()
-        data = self.encode(data)
-
-        uri = f'{self.uri}/api/v1/objects/list'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'})
-        response.raise_for_status()
-
-        return self.decode(response.text)
+        res = await self._vanilla_write_read(
+            'objects/list',
+            self._get_remote_objects_data(),
+            'get'
+        )
+        return res['data']
 
     async def get_remote_object_config(self, obj: Optional[Any]):
-        data = self._get_remote_object_config_data(obj)
-        data = self.encode(data)
-
-        uri = f'{self.uri}/api/v1/objects/config'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'})
-        response.raise_for_status()
-
-        return self.decode(response.text)
+        res = await self._vanilla_write_read(
+            'objects/config',
+            self._get_remote_object_config_data(obj),
+            'get'
+        )
+        return res['data']
 
     async def apply_config_from_remote(self, obj):
         config = await self.get_remote_object_config(obj)
@@ -169,15 +198,12 @@ class RestExecutor(Executor):
 
     async def get_remote_object_property_data(
             self, obj: Any, properties: List[str]) -> dict:
-        data = self._get_remote_object_property_data_data(obj, properties)
-        data = self.encode(data)
-
-        uri = f'{self.uri}/api/v1/objects/properties'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'})
-        response.raise_for_status()
-
-        return self.decode(response.text)
+        res = await self._vanilla_write_read(
+            'objects/properties',
+            self._get_remote_object_property_data_data(obj, properties),
+            'get'
+        )
+        return res['data']
 
     async def apply_property_data_from_remote(
             self, obj: Any, properties: List[str]):
@@ -191,9 +217,15 @@ class RestExecutor(Executor):
         async with response.body() as response_body:
             task_status.started()
             async for _, data, id_, _ in SSEStream.stream(response_body):
-                data = decode(data)
-                if data == 'alive':
+                res = decode(data)
+                if res == 'alive':
                     continue
+
+                exception = res.get('exception', None)
+                if exception is not None:
+                    raise RemoteException from RemoteException(
+                        ).with_traceback(
+                        get_traceback_from_frames(exception['frames']))
 
                 packet, *_ = decode(id_)
                 if last_packet is not None and last_packet + 1 != packet:
@@ -201,16 +233,18 @@ class RestExecutor(Executor):
                         f'Packets were skipped {last_packet} -> {packet}')
                 last_packet = packet
 
-                yield data
+                yield self.decode(res['data'])
 
     @contextlib.asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         data = self._get_remote_object_data_data(
-            obj, trigger_names, triggered_logged_names, logged_names)
+            obj, trigger_names, triggered_logged_names, logged_names,
+            initial_properties)
         data = self.encode(data)
 
         uri = f'{self.uri}/api/v1/stream/data'
@@ -227,9 +261,11 @@ class RestExecutor(Executor):
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED):
         data = self._get_remote_object_data_data(
-            obj, trigger_names, triggered_logged_names, logged_names)
+            obj, trigger_names, triggered_logged_names, logged_names,
+            initial_properties)
         data = self.encode(data)
 
         uri = f'{self.uri}/api/v1/stream/data'
@@ -248,6 +284,8 @@ class RestExecutor(Executor):
         data = self._get_remote_object_channel_data(obj, channel)
         data = self.encode(data)
 
+        if not channel:
+            channel = '_'
         uri = f'{self.uri}/api/v1/stream/{channel}'
         response = await self._session.get(
             uri, data=data, headers={'Content-Type': 'application/json'},
@@ -275,13 +313,10 @@ class RestExecutor(Executor):
 
     async def get_echo_clock(self) -> Tuple[int, int, int]:
         start_time = time.perf_counter_ns()
-        data = self._get_clock_data()
-        data = self.encode(data)
+        res = await self._vanilla_write_read(
+            'echo_clock',
+            self._get_clock_data(),
+            'get'
+        )
 
-        uri = f'{self.uri}/api/v1/echo_clock'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'})
-        response.raise_for_status()
-        server_time = self.decode(response.text)['server_time']
-
-        return start_time, server_time, time.perf_counter_ns()
+        return start_time, res['data']['server_time'], time.perf_counter_ns()

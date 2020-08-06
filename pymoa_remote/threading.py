@@ -7,6 +7,7 @@ from typing import Tuple, AsyncGenerator, Union, Callable, Optional, Dict, \
 import threading
 import math
 import queue as stdlib_queue
+import importlib
 from asyncio import iscoroutinefunction
 from queue import Empty
 import contextlib
@@ -121,6 +122,18 @@ class ThreadExecutor(Executor):
     async def get_async_echo_clock(self) -> Tuple[int, int, int]:
         return await self._async_executor.get_echo_clock()
 
+    async def remote_import(self, module):
+        if not isinstance(module, str):
+            module = module.__name__
+        importlib.import_module(module)
+
+    async def register_remote_class(self, cls):
+        mod = importlib.import_module(cls.__module__)
+        if cls.__name__ != cls.__qualname__:
+            raise TypeError(f'Cannot register {cls}. Can only register module '
+                            f'level classes')
+        self.registry.register_class(getattr(mod, cls.__name__))
+
     async def ensure_remote_instance(self, obj, hash_name, *args, **kwargs):
         if id(obj) in self._obj_executor:
             return
@@ -164,6 +177,7 @@ class ThreadExecutor(Executor):
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
         raise NotImplementedError
 
@@ -171,6 +185,7 @@ class ThreadExecutor(Executor):
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
+            initial_properties: Iterable[str] = (),
             task_status=TASK_STATUS_IGNORED):
         raise NotImplementedError
 
@@ -211,7 +226,8 @@ class SyncThreadExecutor:
         self._limiter = trio.Lock()
 
         thread = self._thread = threading.Thread(
-            target=self._worker_thread_fn, name=name, args=(queue, event))
+            target=self._worker_thread_fn, name=name,
+            args=(queue, event, trio.lowlevel.current_trio_token()))
         thread.start()
 
     async def stop(self):
@@ -224,7 +240,7 @@ class SyncThreadExecutor:
         self._thread = self._exec_queue = self._limiter = None
         self._thread_done_event = None
 
-    def _worker_thread_fn(self, queue, event):
+    def _worker_thread_fn(self, queue, event, start_token):
         eof = self.eof
         try:
             while True:
@@ -290,7 +306,10 @@ class SyncThreadExecutor:
                     except trio.RunFinishedError:
                         pass
         finally:
-            event.set()
+            try:
+                start_token.run_sync_soon(event.set)
+            except trio.RunFinishedError:
+                pass
 
     @trio.lowlevel.enable_ki_protection
     async def execute(self, obj, sync_fn, args=(), kwargs=None, callback=None):
@@ -404,7 +423,8 @@ class AsyncThreadExecutor:
 
         thread = self._thread = threading.Thread(
             target=self._worker_thread_fn, name=name,
-            args=(event, from_thread_portal, done_event))
+            args=(event, from_thread_portal, done_event,
+                  trio.lowlevel.current_trio_token()))
         thread.start()
         # wait until class variables are set
         await event.wait()
@@ -423,7 +443,8 @@ class AsyncThreadExecutor:
         self.cancel_nursery = self._thread_done_event = None
 
     def _worker_thread_fn(
-            self, event, from_thread_portal: 'TrioPortal', done_event):
+            self, event, from_thread_portal: 'TrioPortal', done_event,
+            start_token):
         # This is the function that runs in the worker thread to do the actual
         # work
         async def runner():
@@ -437,7 +458,10 @@ class AsyncThreadExecutor:
         try:
             trio.run(runner)
         finally:
-            done_event.set()
+            try:
+                start_token.run_sync_soon(done_event.set)
+            except trio.RunFinishedError:
+                pass
 
     async def _execute_function(self, obj, async_fn, args, kwargs):
         return await async_fn(obj, *args, **kwargs)
