@@ -12,12 +12,13 @@ from async_generator import aclosing
 from functools import partial
 import argparse
 import json
+import os
 
 from pymoa_remote.threading import ThreadExecutor
 from pymoa_remote.utils import MaxSizeErrorDeque
 from pymoa_remote.server import SimpleExecutorServer, \
     dispatch_stream_channel_to_queues
-from pymoa_remote.exception import extract_frames
+from pymoa_remote.exception import serialize_exception
 
 __all__ = ('create_app', 'QuartRestServer', 'QuartSocketServer')
 
@@ -37,11 +38,7 @@ def convert_io(func):
             encoded = executor.encode({'data': result})
         except Exception as e:
             # todo: ignore write_socket in generator
-            ret_data = {
-                'exception': {
-                    'frames': extract_frames(e)
-                },
-            }
+            ret_data = {'exception': serialize_exception(e)}
             encoded = executor.encode(ret_data)
 
         return await make_response(
@@ -109,14 +106,10 @@ class QuartRestServer(SimpleExecutorServer):
                 message = f"data: {resp_data}\nid: {id_data}\n\n"
                 yield message.encode('utf-8')
             except Exception as e:
-                ret_data = {
-                    'exception': {
-                        'frames': extract_frames(e)
-                    },
-                }
-
+                ret_data = {'exception': serialize_exception(e)}
                 resp_data = self.encode(ret_data)
                 id_data = json.dumps(False)
+
                 message = f"data: {resp_data}\nid: {id_data}\n\n"
                 yield message.encode('utf-8')
 
@@ -186,14 +179,10 @@ class QuartRestServer(SimpleExecutorServer):
                 finally:
                     await self.stop_logging_object_data(binding)
             except Exception as e:
-                msg_data = {
-                    'exception': {
-                        'frames': extract_frames(e)
-                    },
-                }
-
+                msg_data = {'exception': serialize_exception(e)}
                 data = self.encode(msg_data)
                 id_data = json.dumps((None, ))
+
                 message = f"data: {data}\nid: {id_data}\n\n"
                 yield message.encode('utf-8')
 
@@ -241,14 +230,10 @@ class QuartRestServer(SimpleExecutorServer):
 
                     packet += 1
             except Exception as e:
-                msg_data = {
-                    'exception': {
-                        'frames': extract_frames(e)
-                    },
-                }
-
+                msg_data = {'exception': serialize_exception(e)}
                 data = self.encode(msg_data)
                 id_data = json.dumps((None, None, None))
+
                 message = f"data: {data}\nid: {id_data}\n\n"
                 yield message.encode('utf-8')
             finally:
@@ -340,11 +325,7 @@ class QuartSocketServer(SimpleExecutorServer):
                 encoded_ret = self.encode(ret_data)
             except Exception as e:
                 # todo: ignore write_socket in generator
-                ret_data = {
-                    'exception': {
-                        'frames': extract_frames(e)
-                    },
-                }
+                ret_data = {'exception': serialize_exception(e)}
                 encoded_ret = self.encode(ret_data)
 
             await websocket.send(encoded_ret)
@@ -376,11 +357,7 @@ class QuartSocketServer(SimpleExecutorServer):
             finally:
                 await self.stop_logging_object_data(binding)
         except Exception as e:
-            ret_data = {
-                'exception': {
-                    'frames': extract_frames(e)
-                },
-            }
+            ret_data = {'exception': serialize_exception(e)}
             await websocket.send(self.encode(ret_data))
 
     async def websocket_stream_handler(self, channel, data):
@@ -407,11 +384,7 @@ class QuartSocketServer(SimpleExecutorServer):
                 await websocket.send(self.encode(msg_data))
         except Exception as e:
             # todo: ignore error when socket is closed remotely
-            ret_data = {
-                'exception': {
-                    'frames': extract_frames(e)
-                },
-            }
+            ret_data = {'exception': serialize_exception(e)}
             await websocket.send(self.encode(ret_data))
         finally:
             if hash_key is not None:

@@ -12,8 +12,8 @@ from trio import socket, SocketStream, TASK_STATUS_IGNORED, open_tcp_stream
 from tree_config import apply_config
 
 from pymoa_remote.client import Executor
-from pymoa_remote.executor import NO_CALLBACK, RemoteException
-from pymoa_remote.exception import get_traceback_from_frames
+from pymoa_remote.executor import NO_CALLBACK
+from pymoa_remote.exception import raise_remote_exception_from_frames
 
 __all__ = ('SocketExecutor', )
 
@@ -115,8 +115,7 @@ class SocketExecutor(Executor):
     def raise_return_value(self, data: dict, packet: int = None):
         exception = data.get('exception', None)
         if exception is not None:
-            raise RemoteException from RemoteException().with_traceback(
-                get_traceback_from_frames(exception['frames']))
+            raise_remote_exception_from_frames(**exception)
 
         # todo: implement reading errors when server fails
         if packet is not None:
@@ -270,9 +269,7 @@ class SocketExecutor(Executor):
 
                 exception = res.get('exception', None)
                 if exception is not None:
-                    raise RemoteException from RemoteException(
-                        ).with_traceback(
-                        get_traceback_from_frames(exception['frames']))
+                    raise_remote_exception_from_frames(**exception)
 
                 packet = res['packet']
                 if last_packet is not None and last_packet + 1 != packet:

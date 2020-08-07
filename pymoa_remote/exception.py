@@ -2,7 +2,13 @@ import traceback
 from types import CodeType
 
 __all__ = (
-    'extract_frames', 'get_traceback_from_frames', 'get_fake_traceback_obj')
+    'RemoteException', 'extract_frames', 'get_traceback_from_frames',
+    'get_fake_traceback_obj', 'serialize_exception',
+    'raise_remote_exception_from_frames')
+
+
+class RemoteException(Exception):
+    pass
 
 
 class _DummyException(Exception):
@@ -94,3 +100,27 @@ def get_traceback_from_frames(frames):
         next_tb = tb
 
     return root
+
+
+def serialize_exception(e):
+    return {
+        'frames': extract_frames(e),
+        'err_type': e.__class__.__name__,
+        'value': str(e),
+    }
+
+
+def raise_remote_exception_from_frames(frames=(), err_type=None, value=''):
+    if err_type and value:
+        msg = f'{err_type}: {value}'
+    elif err_type:
+        msg = f'{err_type}'
+    elif value:
+        msg = f'{value}'
+    else:
+        msg = ''
+
+    if frames:
+        raise RemoteException(msg) from RemoteException(msg).with_traceback(
+            get_traceback_from_frames(frames))
+    raise RemoteException(msg)

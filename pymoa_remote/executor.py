@@ -9,12 +9,7 @@ from trio import TASK_STATUS_IGNORED
 import base64
 
 __all__ = (
-    'RemoteException', 'NO_CALLBACK', 'ExecutorBase', 'InstanceRegistry',
-    'ReferenceableMetaclass')
-
-
-class RemoteException(Exception):
-    pass
+    'NO_CALLBACK', 'ExecutorBase', 'InstanceRegistry')
 
 
 NO_CALLBACK = '#@none'

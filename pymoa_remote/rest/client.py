@@ -15,8 +15,8 @@ from tree_config import apply_config
 
 from pymoa_remote.rest import SSEStream
 from pymoa_remote.client import Executor
-from pymoa_remote.executor import NO_CALLBACK, RemoteException
-from pymoa_remote.exception import get_traceback_from_frames
+from pymoa_remote.executor import NO_CALLBACK
+from pymoa_remote.exception import raise_remote_exception_from_frames
 
 __all__ = ('RestExecutor', )
 
@@ -74,8 +74,7 @@ class RestExecutor(Executor):
 
         exception = res.get('exception', None)
         if exception is not None:
-            raise RemoteException from RemoteException().with_traceback(
-                get_traceback_from_frames(exception['frames']))
+            raise_remote_exception_from_frames(**exception)
 
         return res
 
@@ -164,9 +163,7 @@ class RestExecutor(Executor):
 
                     exception = data.get('exception', None)
                     if exception is not None:
-                        raise RemoteException from RemoteException(
-                            ).with_traceback(
-                                get_traceback_from_frames(exception['frames']))
+                        raise_remote_exception_from_frames(**exception)
 
                     done_execute = decode(id_)
                     if done_execute:
@@ -223,9 +220,7 @@ class RestExecutor(Executor):
 
                 exception = res.get('exception', None)
                 if exception is not None:
-                    raise RemoteException from RemoteException(
-                        ).with_traceback(
-                        get_traceback_from_frames(exception['frames']))
+                    raise_remote_exception_from_frames(**exception)
 
                 packet, *_ = decode(id_)
                 if last_packet is not None and last_packet + 1 != packet:

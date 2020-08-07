@@ -12,7 +12,7 @@ from trio import socket, SocketStream, SocketListener, serve_listeners
 from pymoa_remote.utils import MaxSizeErrorDeque
 from pymoa_remote.threading import ThreadExecutor
 from pymoa_remote.client import ExecutorContext
-from pymoa_remote.exception import extract_frames
+from pymoa_remote.exception import serialize_exception
 from pymoa_remote.server import SimpleExecutorServer, \
     dispatch_stream_channel_to_queues
 
@@ -115,11 +115,7 @@ async def socket_handler(executor: ProcessSocketServer, stream: SocketStream):
             encoded_ret = executor.encode(ret_data)
         except Exception as e:
             # todo: ignore write_socket in generator
-            ret_data = {
-                'exception': {
-                    'frames': extract_frames(e)
-                },
-            }
+            ret_data = {'exception': serialize_exception(e)}
             encoded_ret = executor.encode(ret_data)
 
         await executor.write_socket(encoded_ret, stream)
@@ -154,11 +150,7 @@ async def socket_data_stream_handler(
         finally:
             await executor.stop_logging_object_data(binding)
     except Exception as e:
-        ret_data = {
-            'exception': {
-                'frames': extract_frames(e)
-            },
-        }
+        ret_data = {'exception': serialize_exception(e)}
         await executor.write_socket(executor.encode(ret_data), stream)
 
 
@@ -186,11 +178,7 @@ async def socket_stream_handler(
 
             await executor.write_socket(executor.encode(msg_data), stream)
     except Exception as e:
-        ret_data = {
-            'exception': {
-                'frames': extract_frames(e)
-            },
-        }
+        ret_data = {'exception': serialize_exception(e)}
         await executor.write_socket(executor.encode(ret_data), stream)
     finally:
         if hash_key is not None:
