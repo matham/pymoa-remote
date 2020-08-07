@@ -56,6 +56,8 @@ class MultiprocessSocketExecutor(SocketExecutor):
             port = self.port = s.getsockname()[1]
             s.close()
 
+        env = os.environ.copy()
+        env['KIVY_NO_ARGS'] = '1'
         self._process = await trio.open_process(
             [sys.executable, '-m', 'pymoa_remote.app.multiprocessing',
              '--port', str(port),
