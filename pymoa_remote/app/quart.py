@@ -419,9 +419,14 @@ def handle_unexpected_error(error):
     return jsonify(response), status_code
 
 
-def create_app() -> QuartTrio:
+def create_app(
+        stream_changes, allow_remote_class_registration,
+        allow_import_from_main, max_queue_size) -> QuartTrio:
     """Creates the quart app.
     """
+    global MAX_QUEUE_SIZE
+    MAX_QUEUE_SIZE = max_queue_size
+
     app = QuartTrio(__name__)
 
     thread_executor = ThreadExecutor()
@@ -429,11 +434,22 @@ def create_app() -> QuartTrio:
     app.after_serving(thread_executor.stop_executor)
 
     stream_clients = defaultdict(dict)
+
     rest_executor = app.rest_executor = QuartRestServer(
         quart_app=app, executor=thread_executor, stream_clients=stream_clients)
+    rest_executor.stream_changes = stream_changes
+    rest_executor.allow_remote_class_registration = \
+        allow_remote_class_registration
+    rest_executor.allow_import_from_main = allow_import_from_main
+
+    # the objects are shared between the two executors
     socket_executor = app.socket_executor = QuartSocketServer(
         quart_app=app, registry=rest_executor.registry,
         executor=thread_executor, stream_clients=stream_clients)
+    socket_executor.stream_changes = stream_changes
+    socket_executor.allow_remote_class_registration = \
+        allow_remote_class_registration
+    socket_executor.allow_import_from_main = allow_import_from_main
 
     app.add_url_rule(
         '/api/v1/objects/import', view_func=rest_executor.remote_import,
@@ -489,14 +505,40 @@ def create_app() -> QuartTrio:
 
 def run_app():
     parser = argparse.ArgumentParser(description='PyMoa basic server.')
+
+    def to_bool(val):
+        if val.lower() in ('1', 'true', 'yes', 'y', 't'):
+            return True
+        if val.lower() in ('0', 'false', 'no', 'n', 'f'):
+            return False
+        raise ValueError(f'{val} not recognized')
+
     parser.add_argument(
         '--host', dest='host', action='store', default="127.0.0.1")
     parser.add_argument(
         '--port', dest='port', action='store', default=5000, type=int)
+    parser.add_argument(
+        '--stream_changes', dest='stream_changes', action='store',
+        default=True, type=to_bool)
+    parser.add_argument(
+        '--remote_class_registration',
+        dest='allow_remote_class_registration', action='store', default=True,
+        type=to_bool)
+    parser.add_argument(
+        '--import_from_main', dest='allow_import_from_main', action='store',
+        default=False, type=to_bool)
+    parser.add_argument(
+        '--max_queue_size', dest='max_queue_size', action='store',
+        default=MAX_QUEUE_SIZE, type=int)
 
     args = parser.parse_args()
-    create_app().run(args.host, args.port)
+
+    create_app(
+        args.stream_changes, args.allow_remote_class_registration,
+        args.allow_import_from_main, args.max_queue_size
+    ).run(args.host, args.port)
 
 
 if __name__ == '__main__':
+    os.environ.setdefault('KIVY_NO_ARGS', '1')
     run_app()

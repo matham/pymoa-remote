@@ -4,8 +4,8 @@
 """
 from trio import socket
 import trio
+import os
 import sys
-import subprocess
 from typing import Optional
 
 from pymoa_remote.socket.client import SocketExecutor
@@ -24,10 +24,22 @@ class MultiprocessSocketExecutor(SocketExecutor):
 
     port: int = None
 
-    def __init__(self, server: str = '', port: int = 0, **kwargs):
+    stream_changes = True
+
+    allow_remote_class_registration = True
+
+    allow_import_from_main = False
+
+    def __init__(
+            self, server: str = '', port: int = 0, stream_changes=True,
+            allow_remote_class_registration=True,
+            allow_import_from_main=False, **kwargs):
         super(MultiprocessSocketExecutor, self).__init__(**kwargs)
         self.server = server
         self.port = port
+        self.stream_changes = stream_changes
+        self.allow_remote_class_registration = allow_remote_class_registration
+        self.allow_import_from_main = allow_import_from_main
 
     async def decode(self, data):
         raise NotImplementedError
@@ -45,8 +57,13 @@ class MultiprocessSocketExecutor(SocketExecutor):
             await s.aclose()
 
         self._process = await trio.open_process(
-            [sys.executable, '-m', 'pymoa.executor.remote.app.multiprocessing',
-             '--port', str(port)])
+            [sys.executable, '-m', 'pymoa_remote.app.multiprocessing',
+             '--port', str(port),
+             '--stream_changes', str(self.stream_changes),
+             '--remote_class_registration',
+             str(self.allow_remote_class_registration),
+             '--import_from_main', str(self.allow_import_from_main)],
+            env=env)
         await super(MultiprocessSocketExecutor, self).start_executor()
 
     async def stop_executor(self, block=True):

@@ -148,10 +148,17 @@ class SocketExecutor(Executor):
         data = self._get_register_remote_class_data(cls)
         await self._vanilla_write_read('register_remote_class', data)
 
-    async def ensure_remote_instance(self, obj, hash_name, *args, **kwargs):
+    async def ensure_remote_instance(
+            self, obj, hash_name, *args, auto_register_class=True, **kwargs):
+        cls = obj.__class__
+        if auto_register_class and not self.registry.is_class_registered(
+                class_to_register=cls):
+            self.registry.register_class(cls)
+
         self.registry.add_instance(obj, hash_name)
+
         data = self._get_ensure_remote_instance_data(
-            obj, args, kwargs, hash_name)
+            obj, args, kwargs, hash_name, auto_register_class)
         await self._vanilla_write_read('ensure_remote_instance', data)
 
     async def delete_remote_instance(self, obj):

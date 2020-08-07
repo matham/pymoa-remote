@@ -94,7 +94,8 @@ class ExecutorBase:
     async def register_remote_class(self, cls):
         raise NotImplementedError
 
-    async def ensure_remote_instance(self, obj, hash_name, *args, **kwargs):
+    async def ensure_remote_instance(
+            self, obj, hash_name, *args, auto_register_class=True, **kwargs):
         raise NotImplementedError
 
     async def delete_remote_instance(self, obj):
@@ -173,10 +174,27 @@ class InstanceRegistry:
         self.hashed_instances_ids = {}
 
     @classmethod
-    def register_class(cls, class_to_register: type):
-        cls.referenceable_classes[(
-            class_to_register.__name__, class_to_register.__module__,
-            class_to_register.__qualname__)] = class_to_register
+    def is_class_registered(
+            cls, class_to_register: type = None, class_triple=None):
+        if class_triple is None:
+            class_triple = (
+                class_to_register.__name__, class_to_register.__module__,
+                class_to_register.__qualname__)
+        return class_triple in cls.referenceable_classes
+
+    @classmethod
+    def register_class(cls, class_to_register: type, triple=None):
+        """Duplicated register raises error.
+        """
+        if triple is None:
+            triple = (
+                class_to_register.__name__, class_to_register.__module__,
+                class_to_register.__qualname__)
+
+        if triple in cls.referenceable_classes:
+            raise ValueError(f'{class_to_register} already registered')
+
+        cls.referenceable_classes[triple] = class_to_register
 
     @classmethod
     def convert_hash_to_base64(cls, hash_val: str) -> str:
@@ -293,11 +311,3 @@ class InstanceRegistry:
         encoded_lengths = struct.pack(f'!{len(lengths)}I', *lengths)
 
         return b''.join([header, json_bytes, encoded_lengths] + buffers)
-
-
-class ReferenceableMetaclass(type):
-
-    def __new__(mcs, *args, **kwargs):
-        cls = super().__new__(mcs, *args, **kwargs)
-        InstanceRegistry.register_class(cls)
-        return cls

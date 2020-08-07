@@ -187,10 +187,18 @@ async def socket_stream_handler(
                 del executor.stream_clients[hash_key]
 
 
-async def serve(host, port):
+async def serve(
+        host, port, stream_changes, allow_remote_class_registration,
+        allow_import_from_main, max_queue_size):
     # todo: catch and send back errors (ignoring socket closing errors?)
+    global MAX_QUEUE_SIZE
+    MAX_QUEUE_SIZE = max_queue_size
     thread_executor = ThreadExecutor()
+
     executor = ProcessSocketServer(executor=thread_executor)
+    executor.stream_changes = stream_changes
+    executor.allow_remote_class_registration = allow_remote_class_registration
+    executor.allow_import_from_main = allow_import_from_main
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = (host, port)
@@ -223,13 +231,38 @@ async def serve(host, port):
 
 def run_app():
     parser = argparse.ArgumentParser(description='PyMoa process server.')
+
+    def to_bool(val):
+        if val.lower() in ('1', 'true', 'yes', 'y', 't'):
+            return True
+        if val.lower() in ('0', 'false', 'no', 'n', 'f'):
+            return False
+        raise ValueError(f'{val} not recognized')
+
     parser.add_argument(
         '--host', dest='host', action='store', default="127.0.0.1")
     parser.add_argument(
         '--port', dest='port', action='store', default=5000, type=int)
+    parser.add_argument(
+        '--stream_changes', dest='stream_changes', action='store',
+        default=True, type=to_bool)
+    parser.add_argument(
+        '--remote_class_registration',
+        dest='allow_remote_class_registration', action='store', default=True,
+        type=to_bool)
+    parser.add_argument(
+        '--import_from_main', dest='allow_import_from_main', action='store',
+        default=False, type=to_bool)
+    parser.add_argument(
+        '--max_queue_size', dest='max_queue_size', action='store',
+        default=MAX_QUEUE_SIZE, type=int)
+
     args = parser.parse_args()
 
-    trio.run(serve, args.host, args.port)
+    trio.run(
+        serve, args.host, args.port, args.stream_changes,
+        args.allow_remote_class_registration, args.allow_import_from_main,
+        args.max_queue_size)
 
 
 if __name__ == '__main__':

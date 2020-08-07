@@ -2,9 +2,12 @@ from typing import Dict, List, Any, Callable, Tuple, Set, AsyncGenerator, \
     Iterable, Optional
 from async_generator import aclosing
 import importlib
+import importlib.util
 import time
 from itertools import chain
 from tree_config import apply_config, read_config_from_object
+import uuid
+import sys
 
 from pymoa_remote.executor import InstanceRegistry, ExecutorBase
 from pymoa_remote.utils import MaxSizeErrorDeque
@@ -18,21 +21,16 @@ class ExecutorServerBase:
     """Base class for the server side handling of remote object method
     execution.
     """
+    # todo: document the channels and ensure all remotes have them
+    # todo: order may not be in the order the events happened
+    # todo: maybe make object creation/deletion/enumeration and execution
+    #  thread safe
 
-    stream_changes = True
+    stream_changes = False
 
-    allow_remote_class_registration = True
+    allow_remote_class_registration = False
 
-    def __init__(
-            self, stream_changes=True, allow_remote_class_registration=True,
-            **kwargs):
-        super().__init__(**kwargs)
-        # todo: document the channels and ensure all remotes have them
-        # todo: order may not be in the order the events happened
-        # todo: maybe make object creation/deletion/enumeration and execution
-        #  thread safe
-        self.stream_changes = stream_changes
-        self.allow_remote_class_registration = allow_remote_class_registration
+    allow_import_from_main = False
 
     async def remote_import(self, *args, **kwargs):
         raise NotImplementedError
@@ -125,15 +123,42 @@ class ExecutorServer(ExecutorServerBase):
         cls_name = data['cls_name']
         module = data['module']
         qual_name = data['qual_name']
+        triple = cls_name, module, qual_name
+
+        if not self.allow_remote_class_registration:
+            raise TypeError(
+                f'Not allowed to remotely register class <{module}, '
+                f'{qual_name}, {cls_name}>. Consider registering the class '
+                f'automatically when the module is imported on the server')
 
         if cls_name != qual_name:
             raise TypeError(
                 f'Cannot register {cls_name}. Can only register module '
                 f'level classes')
 
-        mod = importlib.import_module(module)
+        if module == '__main__':
+            if not self.allow_import_from_main:
+                raise ValueError(
+                    f'Cannot import {triple} from `__main__`. Try making it a '
+                    f'proper importable Python package or enable importing '
+                    f'from `__main__`')
+
+            filename = data['mod_filename']
+            if not filename:
+                raise ValueError(
+                    f'Cannot import {triple} from `__main__`, filename not '
+                    f'provided')
+
+            name = 'm' + str(uuid.uuid4()).replace('-', '_')
+            spec = importlib.util.spec_from_file_location(name, filename)
+            mod = importlib.util.module_from_spec(spec)
+            sys.modules[name] = mod
+            spec.loader.exec_module(mod)
+        else:
+            mod = importlib.import_module(module)
+
         cls = getattr(mod, cls_name)
-        self.registry.register_class(cls)
+        self.registry.register_class(cls, triple=triple)
         await self.executor.register_remote_class(cls)
 
     async def _create_instance(self, data: dict) -> Any:
@@ -142,10 +167,16 @@ class ExecutorServer(ExecutorServerBase):
         args = data.pop('args')
         kwargs = data.pop('kwargs')
         config = data.pop('config')
+        auto_register_class = data['auto_register_class']
+
+        if auto_register_class and not self.registry.is_class_registered(
+                class_triple=triple):
+            await self._register_remote_class(data)
 
         obj = self.registry.create_instance(
             triple, hash_name, args, kwargs, config)
-        await self.executor.ensure_remote_instance(obj, *args, **kwargs)
+        await self.executor.ensure_remote_instance(
+            obj, hash_name, *args, **kwargs)
 
         if self.stream_changes:
             self.post_stream_channel(data, 'ensure', hash_name)

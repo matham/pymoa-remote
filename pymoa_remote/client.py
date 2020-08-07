@@ -5,7 +5,7 @@ import trio
 from async_generator import aclosing
 from functools import wraps, partial
 from asyncio import iscoroutinefunction
-from inspect import isgeneratorfunction, isasyncgenfunction
+from inspect import isgeneratorfunction, isasyncgenfunction, getsourcefile
 from tree_config import read_config_from_object
 from contextvars import ContextVar
 
@@ -84,15 +84,22 @@ class Executor(ExecutorBase):
             'uuid': self._uuid,
         }
 
-    def _get_ensure_remote_instance_data(self, obj, args, kwargs, hash_name):
+    def _get_ensure_remote_instance_data(
+            self, obj, args, kwargs, hash_name, auto_register_class):
+        module = obj.__class__.__module__
+        filename = None
+        if module == '__main__':
+            filename = getsourcefile(obj.__class__)
         return {
             'cls_name': obj.__class__.__name__,
-            'module': obj.__class__.__module__,
+            'module': module,
             'qual_name': obj.__class__.__qualname__,
+            'mod_filename': filename,
             'args': args,
             'kwargs': kwargs,
             'config': read_config_from_object(obj),
             'hash_name': hash_name,
+            'auto_register_class': auto_register_class,
             'uuid': self._uuid,
         }
 
