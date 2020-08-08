@@ -220,9 +220,10 @@ class ExecutorServer(ExecutorServerBase):
             post_stream = self.post_stream_channel
 
         obj = self.registry.get_instance(hash_name)
-        gen = getattr(obj, method_name)(*args, **kwargs)
 
-        async with aclosing(gen) as aiter:
+        # method_name is a apply_generator_executor decorated generator so we
+        # just need to enter it because it already does the aclosing
+        async with getattr(obj, method_name)(*args, **kwargs) as aiter:
             async for res in aiter:
                 data['return_value'] = res
 
