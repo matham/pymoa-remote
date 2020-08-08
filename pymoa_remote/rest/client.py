@@ -286,7 +286,7 @@ class RestExecutor(Executor):
         data = self.encode(data)
 
         if not channel:
-            channel = '_'
+            channel = 'all'
         uri = f'{self.uri}/api/v1/stream/{channel}'
         response = await self._session.get(
             uri, data=data, headers={'Content-Type': 'application/json'},
