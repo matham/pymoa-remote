@@ -2,6 +2,7 @@ from typing import Optional, Any, List, Iterable
 import uuid
 import contextlib
 import trio
+import os
 from async_generator import aclosing
 from functools import wraps, partial
 from asyncio import iscoroutinefunction
@@ -89,7 +90,7 @@ class Executor(ExecutorBase):
         module = obj.__class__.__module__
         filename = None
         if module == '__main__':
-            filename = getsourcefile(obj.__class__)
+            filename = os.path.abspath(getsourcefile(obj.__class__))
         return {
             'cls_name': obj.__class__.__name__,
             'module': module,
