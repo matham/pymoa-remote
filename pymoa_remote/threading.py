@@ -56,19 +56,20 @@ class ThreadExecutor(Executor):
         items = list(self._obj_executor.values())
         self._obj_executor.clear()
 
-        for sync_exec, async_exec in items:
-            if sync_exec is not None:
-                await sync_exec.stop()
-            if async_exec is not None:
-                await async_exec.stop()
+        with trio.CancelScope(shield=True):
+            for sync_exec, async_exec in items:
+                if sync_exec is not None:
+                    await sync_exec.stop()
+                if async_exec is not None:
+                    await async_exec.stop()
 
-        if self._sync_executor is not None:
-            await self._sync_executor.stop()
-            self._sync_executor = None
+            if self._sync_executor is not None:
+                await self._sync_executor.stop()
+                self._sync_executor = None
 
-        if self._async_executor is not None:
-            await self._async_executor.stop()
-            self._async_executor = None
+            if self._async_executor is not None:
+                await self._async_executor.stop()
+                self._async_executor = None
 
     async def execute(
             self, obj, fn: Union[Callable, str], args=(), kwargs=None,
