@@ -5,13 +5,14 @@
 # todo: investigate compression and no-cache for data
 # todo: immediately close connection for sse/stream if full
 from quart_trio import QuartTrio
-from quart import make_response, request, current_app, jsonify, websocket
+from quart import make_response, request, jsonify, websocket
 from functools import wraps
 from collections import defaultdict
 from async_generator import aclosing
 import argparse
 import json
 import os
+import trio
 
 from pymoa_remote.threading import ThreadExecutor
 from pymoa_remote.utils import MaxSizeErrorDeque
@@ -19,7 +20,7 @@ from pymoa_remote.server import SimpleExecutorServer, \
     dispatch_stream_channel_to_queues
 from pymoa_remote.exception import serialize_exception
 
-__all__ = ('create_app', 'QuartRestServer', 'QuartSocketServer')
+__all__ = ('create_app', 'start_app', 'QuartRestServer', 'QuartSocketServer')
 
 MAX_QUEUE_SIZE = 50 * 1024 * 1024
 
@@ -430,8 +431,9 @@ def handle_unexpected_error(error):
 
 
 def create_app(
-        stream_changes, allow_remote_class_registration,
-        allow_import_from_main, max_queue_size) -> QuartTrio:
+        stream_changes=True, allow_remote_class_registration=True,
+        allow_import_from_main=False, max_queue_size=MAX_QUEUE_SIZE
+) -> QuartTrio:
     """Creates the quart app.
     """
     global MAX_QUEUE_SIZE
@@ -440,8 +442,6 @@ def create_app(
     app = QuartTrio(__name__)
 
     thread_executor = ThreadExecutor()
-    app.before_serving(thread_executor.start_executor)
-    app.after_serving(thread_executor.stop_executor)
 
     stream_clients = defaultdict(dict)
 
@@ -517,6 +517,12 @@ def create_app(
     return app
 
 
+async def start_app(app, host, port):
+    # start/stop thread executor
+    async with app.rest_executor.executor:
+        await app.run_task(host, port)
+
+
 def run_app():
     parser = argparse.ArgumentParser(description='PyMoa basic server.')
 
@@ -547,10 +553,12 @@ def run_app():
 
     args = parser.parse_args()
 
-    create_app(
+    app = create_app(
         args.stream_changes, args.allow_remote_class_registration,
         args.allow_import_from_main, args.max_queue_size
-    ).run(args.host, args.port)
+    )
+
+    trio.run(start_app, app, args.host, args.port)
 
 
 if __name__ == '__main__':
