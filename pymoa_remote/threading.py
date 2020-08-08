@@ -3,7 +3,7 @@
 """
 
 from typing import Tuple, AsyncGenerator, Union, Callable, Optional, Dict, \
-    List, Iterable, Any
+    List, Iterable, Any, AsyncContextManager
 import threading
 import math
 import queue as stdlib_queue
@@ -186,7 +186,8 @@ class ThreadExecutor(Executor):
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
             initial_properties: Iterable[str] = (),
-            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+            task_status=TASK_STATUS_IGNORED
+    ) -> AsyncContextManager[AsyncGenerator]:
         raise NotImplementedError
 
     async def apply_data_from_remote(
@@ -200,7 +201,8 @@ class ThreadExecutor(Executor):
     @contextlib.asynccontextmanager
     async def get_channel_from_remote(
             self, obj: Optional[Any], channel: str,
-            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+            task_status=TASK_STATUS_IGNORED
+    ) -> AsyncContextManager[AsyncGenerator]:
         raise NotImplementedError
 
     async def apply_execute_from_remote(

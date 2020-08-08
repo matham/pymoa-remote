@@ -20,7 +20,7 @@ class Demo:
 async def main():
     demo = Demo()
     async with MultiprocessSocketExecutor(
-            server='localhost', allow_import_from_main=True) as executor:
+            server='127.0.0.1', allow_import_from_main=True) as executor:
         with ExecutorContext(executor):
             await executor.ensure_remote_instance(demo, 'demo')
             res = await demo.remote_func("cheese")

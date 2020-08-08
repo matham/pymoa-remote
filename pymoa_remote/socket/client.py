@@ -294,7 +294,8 @@ class SocketExecutor(Executor):
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
             initial_properties: Iterable[str] = (),
-            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+            task_status=TASK_STATUS_IGNORED
+    ) -> AsyncContextManager[AsyncGenerator]:
         data = self._get_remote_object_data_data(
             obj, trigger_names, triggered_logged_names, logged_names,
             initial_properties)
@@ -321,7 +322,8 @@ class SocketExecutor(Executor):
     @contextlib.asynccontextmanager
     async def get_channel_from_remote(
             self, obj: Optional[Any], channel: str,
-            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+            task_status=TASK_STATUS_IGNORED
+    ) -> AsyncContextManager[AsyncGenerator]:
         data = self._get_remote_object_channel_data(obj, channel)
         data = {'stream': channel, 'data': data}
 

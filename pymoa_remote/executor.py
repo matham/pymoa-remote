@@ -1,6 +1,6 @@
 import contextlib
 from typing import Dict, List, Any, Callable, Tuple, AsyncGenerator, Union, \
-    Iterable, Optional
+    Iterable, Optional, AsyncContextManager
 import json
 import struct
 from itertools import accumulate
@@ -118,13 +118,13 @@ class ExecutorBase:
             self, obj: Any, properties: List[str]):
         raise NotImplementedError
 
-    @contextlib.asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
             logged_names: Iterable[str] = (),
             initial_properties: Iterable[str] = (),
-            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+            task_status=TASK_STATUS_IGNORED
+    ) -> AsyncContextManager[AsyncGenerator]:
         raise NotImplementedError
 
     async def apply_data_from_remote(
@@ -135,10 +135,10 @@ class ExecutorBase:
             task_status=TASK_STATUS_IGNORED):
         raise NotImplementedError
 
-    @contextlib.asynccontextmanager
     async def get_channel_from_remote(
             self, obj: Optional[Any], channel: str,
-            task_status=TASK_STATUS_IGNORED) -> AsyncGenerator:
+            task_status=TASK_STATUS_IGNORED
+    ) -> AsyncContextManager[AsyncGenerator]:
         raise NotImplementedError
 
     async def apply_execute_from_remote(
