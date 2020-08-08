@@ -113,7 +113,8 @@ class ThreadExecutor(Executor):
                 await executor.start()
 
         async with aclosing(
-                executor.execute(obj, gen, args, kwargs, callback)) as aiter:
+                executor.execute_generator(obj, gen, args, kwargs, callback)
+        ) as aiter:
             async for value in aiter:
                 yield value
 
