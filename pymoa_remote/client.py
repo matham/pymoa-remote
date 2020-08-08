@@ -266,7 +266,8 @@ def apply_executor(func=None, callback=None):
 
     @wraps(func)
     async def wrapper(self, *args, **kwargs):
-        executor: Executor = getattr(self, 'executor', None)
+        executor: Executor = getattr(
+            self, 'pymoa_executor', current_executor.get())
         if executor is None:
             ret_val = func(self, *args, **kwargs)
             Executor.call_execute_callback(self, ret_val, callback)
@@ -280,7 +281,8 @@ def apply_executor(func=None, callback=None):
 
     @wraps(func)
     async def wrapper_coro(self, *args, **kwargs):
-        executor: Executor = getattr(self, 'executor', None)
+        executor: Executor = getattr(
+            self, 'pymoa_executor', current_executor.get())
         if executor is None:
             ret_val = await func(self, *args, **kwargs)
             Executor.call_execute_callback(self, ret_val, callback)
@@ -314,7 +316,8 @@ def apply_generator_executor(func=None, callback=None):
     @contextlib.asynccontextmanager
     @wraps(func)
     async def wrapper_gen(self, *args, **kwargs):
-        executor: Executor = getattr(self, 'executor', None)
+        executor: Executor = getattr(
+            self, 'pymoa_executor', current_executor.get())
         if executor is None:
             async def eat_generator():
                 callback_fn = Executor.get_execute_callback_func(
@@ -342,7 +345,8 @@ def apply_generator_executor(func=None, callback=None):
     @contextlib.asynccontextmanager
     @wraps(func)
     async def wrapper_coro_gen(self, *args, **kwargs):
-        executor: Executor = getattr(self, 'executor', None)
+        executor: Executor = getattr(
+            self, 'pymoa_executor', current_executor.get())
         if executor is None:
             async def eat_generator():
                 callback_fn = Executor.get_execute_callback_func(
