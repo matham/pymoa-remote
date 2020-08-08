@@ -9,7 +9,6 @@ from quart import make_response, request, current_app, jsonify, websocket
 from functools import wraps
 from collections import defaultdict
 from async_generator import aclosing
-from functools import partial
 import argparse
 import json
 import os
@@ -252,6 +251,18 @@ class QuartRestServer(SimpleExecutorServer):
         response.timeout = None
         return response
 
+    async def sse_channel_ensure(self):
+        return await self.sse_channel('ensure')
+
+    async def sse_channel_delete(self):
+        return await self.sse_channel('delete')
+
+    async def sse_channel_execute(self):
+        return await self.sse_channel('execute')
+
+    async def sse_channel_all(self):
+        return await self.sse_channel('')
+
 
 class QuartSocketServer(SimpleExecutorServer):
     """Quart server side socket handler.
@@ -486,14 +497,18 @@ def create_app(
         methods=['GET']
     )
 
-    for channel in ('ensure', 'delete', 'execute', ''):
-        # for the catch all empty string we use _
-        chan = channel or '_'
-        app.add_url_rule(
-            f'/api/v1/stream/{chan}',
-            view_func=partial(rest_executor.sse_channel, channel),
-            methods=['GET']
-        )
+    app.add_url_rule(
+        '/api/v1/stream/ensure',
+        view_func=rest_executor.sse_channel_ensure, methods=['GET'])
+    app.add_url_rule(
+        '/api/v1/stream/delete',
+        view_func=rest_executor.sse_channel_delete, methods=['GET'])
+    app.add_url_rule(
+        '/api/v1/stream/execute',
+        view_func=rest_executor.sse_channel_execute, methods=['GET'])
+    app.add_url_rule(
+        '/api/v1/stream/all',
+        view_func=rest_executor.sse_channel_all, methods=['GET'])
 
     app.add_websocket('/api/v1/ws', view_func=socket_executor.ws)
 
