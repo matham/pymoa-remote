@@ -241,6 +241,9 @@ class LocalRegistry(InstanceRegistry):
     """
 
     def add_instance(self, obj, hash_name):
+        if hash_name in self.hashed_instances:
+            raise ValueError(f'Object <{obj}, {hash_name}> already exists')
+
         self.hashed_instances[hash_name] = obj
         self.hashed_instances_ids[id(obj)] = hash_name
         return obj

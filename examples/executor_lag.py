@@ -54,21 +54,18 @@ async def measure_executor(executor, name):
         responses.append((te - ts) / 1e6)
     response = sum(responses) / len(responses)
 
-    await executor.ensure_remote_instance(device, 'analog_random')
+    async with executor.remote_instance(device, 'analog_random'):
+        ts = time.perf_counter_ns()
+        for _ in range(100):
+            await device.read_state()
 
-    ts = time.perf_counter_ns()
-    for _ in range(100):
-        await device.read_state()
+        te = time.perf_counter_ns()
+        rate = 100 * 1e9 / (te - ts)
 
-    te = time.perf_counter_ns()
-    rate = 100 * 1e9 / (te - ts)
-
-    async with device.generate_data(100) as aiter:
-        async for _ in aiter:
-            pass
-    rate_cont = 100 * 1e9 / (time.perf_counter_ns() - te)
-
-    await executor.delete_remote_instance(device)
+        async with device.generate_data(100) as aiter:
+            async for _ in aiter:
+                pass
+        rate_cont = 100 * 1e9 / (time.perf_counter_ns() - te)
 
     print(f'{name} - {cls.__name__}; '
           f'Round-trip lag: {response:.2f}ms. '
@@ -89,18 +86,15 @@ async def measure_executor_async(executor, name):
     else:
         response = 0
 
-    await executor.ensure_remote_instance(device, 'analog_random')
+    async with executor.remote_instance(device, 'analog_random'):
+        ts = time.perf_counter_ns()
+        for _ in range(100):
+            await device.read_state_async()
 
-    ts = time.perf_counter_ns()
-    for _ in range(100):
-        await device.read_state_async()
+        te = time.perf_counter_ns()
+        rate = 100 * 1e9 / (te - ts)
 
-    te = time.perf_counter_ns()
-    rate = 100 * 1e9 / (te - ts)
-
-    rate_cont = 0
-
-    await executor.delete_remote_instance(device)
+        rate_cont = 0
 
     print(f'{name}-async - {cls.__name__}; '
           f'Round-trip lag: {response:.2f}ms. '

@@ -38,7 +38,7 @@ class ExecutorServerBase:
     async def register_remote_class(self, *args, **kwargs):
         raise NotImplementedError
 
-    async def ensure_instance(self, *args, **kwargs):
+    async def ensure_instance(self, *args, **kwargs) -> bool:
         raise NotImplementedError
 
     async def delete_instance(self, *args, **kwargs):
@@ -286,12 +286,13 @@ class SimpleExecutorServer(ExecutorServer):
     async def register_remote_class(self, data: dict):
         await self._register_remote_class(data)
 
-    async def ensure_instance(self, data: dict) -> None:
+    async def ensure_instance(self, data: dict) -> bool:
         hash_name = data['hash_name']
         if hash_name in self.registry.hashed_instances:
-            return
+            return False
 
         await self._create_instance(data)
+        return True
 
     async def delete_instance(self, data: dict) -> None:
         hash_name = data['hash_name']
@@ -426,6 +427,10 @@ class RemoteRegistry(InstanceRegistry):
     def create_instance(
             self, cls_triple: Tuple[str, str, str], hash_name: str,
             args: tuple, kwargs: dict, config: dict) -> Any:
+        if hash_name in self.hashed_instances:
+            raise ValueError(
+                f'Object <{hash_name}, {cls_triple}> already exists')
+
         obj = self.referenceable_classes[cls_triple](*args, **kwargs)
         apply_config(obj, config)
 

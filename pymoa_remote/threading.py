@@ -137,9 +137,10 @@ class ThreadExecutor(Executor):
         self.registry.register_class(getattr(mod, cls.__name__))
 
     async def ensure_remote_instance(
-            self, obj, hash_name, *args, auto_register_class=True, **kwargs):
+            self, obj, hash_name, *args, auto_register_class=True, **kwargs
+    ) -> bool:
         if id(obj) in self._obj_executor:
-            return
+            return False
 
         cls = obj.__class__
         if auto_register_class and not self.registry.is_class_registered(
@@ -148,6 +149,7 @@ class ThreadExecutor(Executor):
 
         self._obj_executor[id(obj)] = [None, None]
         self.registry.add_instance(obj, hash_name)
+        return True
 
     async def delete_remote_instance(self, obj):
         if id(obj) not in self._obj_executor:

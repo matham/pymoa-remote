@@ -94,8 +94,29 @@ class ExecutorBase:
     async def register_remote_class(self, cls):
         raise NotImplementedError
 
+    @contextlib.asynccontextmanager
+    async def remote_instance(
+            self, obj, hash_name, *args, auto_register_class=True, **kwargs
+    ) -> AsyncContextManager[Any]:
+        res = None
+        try:
+            res = await self.ensure_remote_instance(
+                obj, hash_name, *args, auto_register_class=auto_register_class,
+                **kwargs)
+
+            if not res:
+                raise ValueError(
+                    f'Object <{obj}, {hash_name}> already exists. Consider '
+                    f'using ensure_remote_instance instead')
+            yield obj
+        finally:
+            if not res:
+                return
+            await self.delete_remote_instance(obj)
+
     async def ensure_remote_instance(
-            self, obj, hash_name, *args, auto_register_class=True, **kwargs):
+            self, obj, hash_name, *args, auto_register_class=True, **kwargs
+    ) -> bool:
         raise NotImplementedError
 
     async def delete_remote_instance(self, obj):

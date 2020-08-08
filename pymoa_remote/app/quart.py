@@ -74,7 +74,7 @@ class QuartRestServer(SimpleExecutorServer):
         return await super().register_remote_class(data)
 
     @convert_io
-    async def ensure_instance(self, data: dict) -> None:
+    async def ensure_instance(self, data: dict) -> bool:
         return await super().ensure_instance(data)
 
     @convert_io

@@ -42,16 +42,23 @@ async def thread_executor():
 
 
 @pytest.fixture
+async def process_executor():
+    from pymoa_remote.socket.multiprocessing_client import \
+        MultiprocessSocketExecutor
+    from pymoa_remote.client import ExecutorContext
+    async with MultiprocessSocketExecutor(
+            server='127.0.0.1', allow_import_from_main=True) as executor:
+        with ExecutorContext(executor):
+            yield executor
+
+
+@pytest.fixture
 async def quart_rest_device(quart_rest_executor):
     from pymoa_remote.tests.device import RandomDigitalChannel
 
     device = RandomDigitalChannel()
-    await quart_rest_executor.ensure_remote_instance(
-        device, 'rand_device_rest')
-
-    yield device
-
-    await quart_rest_executor.delete_remote_instance(device)
+    async with quart_rest_executor.remote_instance(device, 'rand_device_rest'):
+        yield device
 
 
 @pytest.fixture
@@ -59,12 +66,9 @@ async def quart_socket_device(quart_socket_executor):
     from pymoa_remote.tests.device import RandomDigitalChannel
 
     device = RandomDigitalChannel()
-    await quart_socket_executor.ensure_remote_instance(
-        device, 'rand_device_socket')
-
-    yield device
-
-    await quart_socket_executor.delete_remote_instance(device)
+    async with quart_socket_executor.remote_instance(
+            device, 'rand_device_socket'):
+        yield device
 
 
 @pytest.fixture
@@ -72,8 +76,14 @@ async def thread_device(thread_executor):
     from pymoa_remote.tests.device import RandomDigitalChannel
 
     device = RandomDigitalChannel()
-    await thread_executor.ensure_remote_instance(device, 'rand_device_thread')
+    async with thread_executor.remote_instance(device, 'rand_device_thread'):
+        yield device
 
-    yield device
 
-    await thread_executor.delete_remote_instance(device)
+@pytest.fixture
+async def process_device(process_executor):
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    async with thread_executor.remote_instance(device, 'rand_device_process'):
+        yield device

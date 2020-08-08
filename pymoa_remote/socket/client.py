@@ -124,7 +124,7 @@ class SocketExecutor(Executor):
                 raise ValueError(
                     f"Packet mismatch when reading: {packet} is not {packet_}")
 
-    async def _vanilla_write_read(self, cmd: str, data: dict):
+    async def _vanilla_write_read(self, cmd: str, data: dict) -> dict:
         packet = self._packet
         self._packet += 1
         data = {
@@ -149,7 +149,11 @@ class SocketExecutor(Executor):
         await self._vanilla_write_read('register_remote_class', data)
 
     async def ensure_remote_instance(
-            self, obj, hash_name, *args, auto_register_class=True, **kwargs):
+            self, obj, hash_name, *args, auto_register_class=True, **kwargs
+    ) -> bool:
+        if hash_name in self.registry.hashed_instances:
+            return False
+
         cls = obj.__class__
         if auto_register_class and not self.registry.is_class_registered(
                 class_to_register=cls):
@@ -159,7 +163,9 @@ class SocketExecutor(Executor):
 
         data = self._get_ensure_remote_instance_data(
             obj, args, kwargs, hash_name, auto_register_class)
-        await self._vanilla_write_read('ensure_remote_instance', data)
+        res = await self._vanilla_write_read('ensure_remote_instance', data)
+        assert res['data']
+        return True
 
     async def delete_remote_instance(self, obj):
         await self._vanilla_write_read(

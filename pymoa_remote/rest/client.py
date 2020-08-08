@@ -93,7 +93,11 @@ class RestExecutor(Executor):
         )
 
     async def ensure_remote_instance(
-            self, obj, hash_name, *args, auto_register_class=True, **kwargs):
+            self, obj, hash_name, *args, auto_register_class=True, **kwargs
+    ) -> bool:
+        if hash_name in self.registry.hashed_instances:
+            return False
+
         cls = obj.__class__
         if auto_register_class and not self.registry.is_class_registered(
                 class_to_register=cls):
@@ -101,12 +105,14 @@ class RestExecutor(Executor):
 
         self.registry.add_instance(obj, hash_name)
 
-        await self._vanilla_write_read(
+        res = await self._vanilla_write_read(
             'objects/create_open',
             self._get_ensure_remote_instance_data(
                 obj, args, kwargs, hash_name, auto_register_class),
             'post'
         )
+        assert res['data']
+        return True
 
     async def delete_remote_instance(self, obj):
         await self._vanilla_write_read(
