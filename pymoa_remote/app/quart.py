@@ -27,19 +27,18 @@ MAX_QUEUE_SIZE = 50 * 1024 * 1024
 
 def convert_io(func):
     @wraps(func)
-    async def inner():
-        executor: QuartRestServer = current_app.rest_executor
+    async def inner(self: 'QuartRestServer'):
         try:
             data = (await request.get_data()).decode('utf8')
-            decoded = executor.decode(data)
+            decoded = self.decode(data)
 
-            result = await func(decoded)
+            result = await func(self, decoded)
 
-            encoded = executor.encode({'data': result})
+            encoded = self.encode({'data': result})
         except Exception as e:
             # todo: ignore write_socket in generator
             ret_data = {'exception': serialize_exception(e)}
-            encoded = executor.encode(ret_data)
+            encoded = self.encode(ret_data)
 
         return await make_response(
             encoded, {'Content-Type': 'application/json'})
