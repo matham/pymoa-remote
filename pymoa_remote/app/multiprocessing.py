@@ -83,7 +83,11 @@ async def socket_handler(executor: ProcessSocketServer, stream: SocketStream):
                 'packet': packet,
             }
 
-            if cmd == 'ensure_remote_instance':
+            if cmd == 'remote_import':
+                res = await executor.remote_import(data)
+            elif cmd == 'register_remote_class':
+                res = await executor.register_remote_class(data)
+            elif cmd == 'ensure_remote_instance':
                 res = await executor.ensure_instance(data)
             elif cmd == 'delete_remote_instance':
                 res = await executor.delete_instance(data)
