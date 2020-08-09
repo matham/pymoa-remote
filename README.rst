@@ -19,6 +19,6 @@ To install https://matham.github.io/pymoa-remote/installation.html
     :target: https://coveralls.io/github/matham/pymoa-remote?branch=master
     :alt: Coverage status
 
-.. image:: https://github.com/matham/pymoa-remote/workflows/.github/workflows/pythonapp.yml/badge.svg
+.. image:: https://github.com/matham/pymoa-remote/workflows/Python%20application/badge.svg
     :target: https://github.com/matham/pymoa-remote/actions
     :alt: Github action status
