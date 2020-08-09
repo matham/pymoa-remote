@@ -34,6 +34,8 @@ class ExecutorBase:
 
     supports_non_coroutine = True
 
+    is_remote = True
+
     async def start_executor(self):
         raise NotImplementedError
 
@@ -92,6 +94,7 @@ class ExecutorBase:
         raise NotImplementedError
 
     async def register_remote_class(self, cls):
+        # todo: add method to check if class is registered (maybe?)
         raise NotImplementedError
 
     @contextlib.asynccontextmanager

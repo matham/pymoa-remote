@@ -31,6 +31,8 @@ __all__ = (
 
 class ThreadExecutor(Executor):
 
+    is_remote = False
+
     _obj_executor: Dict[
         int,
         List[Union[None, 'SyncThreadExecutor', 'AsyncThreadExecutor']]] = {}
