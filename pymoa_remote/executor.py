@@ -193,20 +193,20 @@ class InstanceRegistry:
 
     def __init__(self, **kwargs):
         super(InstanceRegistry, self).__init__(**kwargs)
+        self.referenceable_classes = {}
         self.hashed_instances = {}
         self.hashed_instances_ids = {}
+        self.json_coders = {}
 
-    @classmethod
     def is_class_registered(
-            cls, class_to_register: type = None, class_triple=None):
+            self, class_to_register: type = None, class_triple=None):
         if class_triple is None:
             class_triple = (
                 class_to_register.__name__, class_to_register.__module__,
                 class_to_register.__qualname__)
-        return class_triple in cls.referenceable_classes
+        return class_triple in self.referenceable_classes
 
-    @classmethod
-    def register_class(cls, class_to_register: type, triple=None):
+    def register_class(self, class_to_register: type, triple=None):
         """Duplicated register raises error.
         """
         if triple is None:
@@ -214,25 +214,22 @@ class InstanceRegistry:
                 class_to_register.__name__, class_to_register.__module__,
                 class_to_register.__qualname__)
 
-        if triple in cls.referenceable_classes:
+        if triple in self.referenceable_classes:
             raise ValueError(f'{class_to_register} already registered')
 
-        cls.referenceable_classes[triple] = class_to_register
+        self.referenceable_classes[triple] = class_to_register
 
-    @classmethod
-    def convert_hash_to_base64(cls, hash_val: str) -> str:
+    def convert_hash_to_base64(self, hash_val: str) -> str:
         return base64.urlsafe_b64encode(
             hash_val.encode('utf8')).decode('ascii')
 
-    @classmethod
-    def convert_base64_to_hash(cls, encoded_hash: Union[bytes, str]) -> str:
+    def convert_base64_to_hash(self, encoded_hash: Union[bytes, str]) -> str:
         return base64.urlsafe_b64decode(encoded_hash).decode('utf8')
 
-    @classmethod
     def register_json_coder(
-            cls, name: str, class_to_register: type, encoder: Callable,
+            self, name: str, class_to_register: type, encoder: Callable,
             decoder: Callable):
-        cls.json_coders[f'__@@{name}'] = class_to_register, encoder, decoder
+        self.json_coders[f'__@@{name}'] = class_to_register, encoder, decoder
 
     def referenceable_json_decoder(self, dct: dict, buffers: list = None):
         if len(dct) != 1:
