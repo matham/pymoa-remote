@@ -19,6 +19,7 @@ from pymoa_remote.utils import MaxSizeErrorDeque
 from pymoa_remote.server import SimpleExecutorServer, \
     dispatch_stream_channel_to_queues
 from pymoa_remote.exception import serialize_exception
+from pymoa_remote.client import ExecutorContext
 
 __all__ = (
     'create_app', 'start_app', 'run_app', 'QuartRestServer',
@@ -525,8 +526,10 @@ def create_app(
 
 async def start_app(app, host='127.0.0.1', port=5000):
     # start/stop thread executor
-    async with app.rest_executor.executor:
-        await app.run_task(host, port)
+    executor = app.rest_executor.executor
+    async with executor:
+        with ExecutorContext(executor):
+            await app.run_task(host, port)
 
 
 def run_app():
