@@ -113,9 +113,8 @@ class ExecutorBase:
                     f'using ensure_remote_instance instead')
             yield obj
         finally:
-            if not res:
-                return
-            await self.delete_remote_instance(obj)
+            if res:
+                await self.delete_remote_instance(obj)
 
     async def ensure_remote_instance(
             self, obj, hash_name, *args, auto_register_class=True, **kwargs
