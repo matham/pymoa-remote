@@ -4,9 +4,9 @@ import trio
 
 @pytest.fixture
 async def quart_app(nursery):
-    from pymoa_remote.app.quart import create_app, run_app
+    from pymoa_remote.app.quart import create_app, start_app
     app = create_app()
-    nursery.start_soon(run_app, app)
+    nursery.start_soon(start_app, app)
     await trio.sleep(.01)
 
     async with app.app_context():
@@ -85,5 +85,22 @@ async def process_device(process_executor):
     from pymoa_remote.tests.device import RandomDigitalChannel
 
     device = RandomDigitalChannel()
-    async with thread_executor.remote_instance(device, 'rand_device_process'):
+    async with process_executor.remote_instance(device, 'rand_device_process'):
         yield device
+
+
+@pytest.fixture(params=['thread', 'process', 'websocket', 'rest'])
+async def every_executor(request):
+    if request.param == 'thread':
+        executor, device = 'thread_executor', 'thread_device'
+    elif request.param == 'process':
+        executor, device = 'process_executor', 'process_device'
+    elif request.param == 'websocket':
+        executor, device = 'quart_socket_executor', 'quart_socket_device'
+    elif request.param == 'rest':
+        executor, device = 'quart_rest_executor', 'quart_rest_device'
+    else:
+        raise ValueError
+
+    executor = request.getfixturevalue(executor)
+    yield executor

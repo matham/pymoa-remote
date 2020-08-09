@@ -1,41 +1,57 @@
-import trio
+from os import getpid
 from threading import get_ident
 
 
 async def test_run_in_thread_executor(thread_device):
-    ident = [None, None, get_ident()]
+    ident = get_ident()
+    pid = getpid()
 
-    remote_count = 0
-    local_count = 0
+    changes = thread_device.changes
+    for i in range(3):
+        assert await thread_device.read_state('sideways') == 'sideways'
+        assert changes['callback'][0] == i + 1
+        assert changes['method'][0] == i + 1
+        assert changes['callback'][1] == pid
+        assert changes['method'][1] == pid
+        assert changes['callback'][2] == ident
+        assert changes['method'][2] != ident
 
-    def remote_callback(*args):
-        nonlocal remote_count
-        remote_count += 1
-        ident[1] = get_ident()
+    async with thread_device.generate_data([1, 2, 3]) as aiter:
+        async for _ in aiter:
+            pass
 
-    def local_callback(*args):
-        nonlocal local_count
-        local_count += 1
-        ident[0] = get_ident()
+    assert changes['callback'][0] == 6
+    assert changes['method_gen'][0] == 3
+    assert changes['callback'][1] == pid
+    assert changes['method_gen'][1] == pid
+    assert changes['callback'][2] == ident
+    assert changes['method_gen'][2] != ident
 
-    thread_device.local_callback = local_callback
-    thread_device.remote_callback = remote_callback
 
-    assert thread_device.state is None
-    assert thread_device.timestamp is None
+async def test_no_executor():
+    from pymoa_remote.tests.device import RandomDigitalChannel
+    device = RandomDigitalChannel()
 
-    await thread_device.read_state()
-    assert thread_device.state is not None
-    assert local_count == 1
-    assert remote_count == 1
-    assert ident[0] == ident[2]
-    assert ident[1] != ident[2]
-    timestamp = thread_device.timestamp
-    await trio.sleep(.01)
+    ident = get_ident()
+    pid = getpid()
 
-    await thread_device.read_state()
-    assert thread_device.timestamp > timestamp
-    assert local_count == 2
-    assert remote_count == 2
-    assert ident[0] == ident[2]
-    assert ident[1] != ident[2]
+    changes = device.changes
+    for i in range(3):
+        assert await device.read_state('sideways') == 'sideways'
+        assert changes['callback'][0] == i + 1
+        assert changes['method'][0] == i + 1
+        assert changes['callback'][1] == pid
+        assert changes['method'][1] == pid
+        assert changes['callback'][2] == ident
+        assert changes['method'][2] == ident
+
+    async with device.generate_data([1, 2, 3]) as aiter:
+        async for _ in aiter:
+            pass
+
+    assert changes['callback'][0] == 6
+    assert changes['method_gen'][0] == 3
+    assert changes['callback'][1] == pid
+    assert changes['method_gen'][1] == pid
+    assert changes['callback'][2] == ident
+    assert changes['method_gen'][2] == ident
