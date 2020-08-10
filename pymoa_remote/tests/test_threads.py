@@ -8,7 +8,7 @@ async def test_run_in_thread_executor(thread_device):
 
     changes = thread_device.changes
     for i in range(3):
-        assert await thread_device.read_state('sideways') == 'sideways'
+        assert await thread_device.read_state('sideways') == 'sideways' * 2
         assert changes['callback'][0] == i + 1
         assert changes['method'][0] == i + 1
         assert changes['callback'][1] == pid
@@ -37,7 +37,7 @@ async def test_no_executor():
 
     changes = device.changes
     for i in range(3):
-        assert await device.read_state('sideways') == 'sideways'
+        assert await device.read_state('sideways') == 'sideways' * 2
         assert changes['callback'][0] == i + 1
         assert changes['method'][0] == i + 1
         assert changes['callback'][1] == pid

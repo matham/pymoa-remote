@@ -24,7 +24,7 @@ async def test_executor(process_device):
         assert remote_changes['callback'][2] != remote_changes[method][2]
 
     for _ in range(3):
-        assert await process_device.read_state('sideways') == 'sideways'
+        assert await process_device.read_state('sideways') == 'sideways' * 2
 
         counter += 1
         counter_callback += 1

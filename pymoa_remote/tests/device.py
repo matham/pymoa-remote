@@ -59,7 +59,7 @@ class RandomDigitalChannel:
     @apply_executor(callback=executor_callback)
     def read_state(self, value, raise_exception=False):
         if self.remote_callback is not None:
-            self.remote_callback(value)
+            self.remote_callback(value * 2)
         item = self.changes['method']
         item[0] += 1
         item[1], item[2] = getpid(), get_ident()
@@ -67,7 +67,7 @@ class RandomDigitalChannel:
         if raise_exception:
             raise ValueError('Well now...')
 
-        return value
+        return value * 2
 
     @apply_generator_executor(callback=executor_callback)
     def generate_data(self, values):
@@ -79,7 +79,7 @@ class RandomDigitalChannel:
 
             if value == 'exception':
                 raise ValueError('Well now...')
-            yield value
+            yield value * 2
 
     @apply_executor
     def get_changes(self):
