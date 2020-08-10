@@ -290,9 +290,12 @@ class SocketExecutor(Executor):
                         f'Packets were skipped {last_packet} -> {packet}')
                 last_packet = packet
 
-                raw_res = res['data']
-                assert type(raw_res) == bytes
-                yield self.registry.decode_json_buffers_raw(raw_res)
+                ret_data = res['data']
+                assert type(ret_data['data']) == bytes
+                ret_data['data'] = self.registry.decode_json_buffers_raw(
+                    ret_data['data'])
+                print('yielding', ret_data)
+                yield ret_data
 
     @contextlib.asynccontextmanager
     async def get_data_from_remote(

@@ -175,6 +175,7 @@ class Executor(ExecutorBase):
         initial = True
         async with aclosing(gen) as aiter:
             async for data in aiter:
+                data = data['data']
                 if initial:
                     initial = False
 
@@ -220,6 +221,7 @@ class Executor(ExecutorBase):
 
         async with aclosing(gen) as aiter:
             async for data in aiter:
+                data = data['data']
                 callback = data['callback']
                 return_value = data['return_value']
 

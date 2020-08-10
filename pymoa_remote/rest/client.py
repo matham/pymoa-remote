@@ -240,7 +240,9 @@ class RestExecutor(Executor):
                         f'Packets were skipped {last_packet} -> {packet}')
                 last_packet = packet
 
-                yield self.decode(res['data'])
+                ret_data = res['data']
+                ret_data['data'] = self.decode(ret_data['data'])
+                yield ret_data
 
     @contextlib.asynccontextmanager
     async def get_data_from_remote(
