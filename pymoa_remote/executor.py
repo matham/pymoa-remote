@@ -159,7 +159,7 @@ class ExecutorBase:
         raise NotImplementedError
 
     async def get_channel_from_remote(
-            self, obj: Optional[Any], channel: str,
+            self, hash_name: str, channel: str,
             task_status=TASK_STATUS_IGNORED
     ) -> AsyncContextManager[AsyncGenerator]:
         raise NotImplementedError

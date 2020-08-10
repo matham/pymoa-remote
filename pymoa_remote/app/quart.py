@@ -267,8 +267,8 @@ class QuartRestServer(SimpleExecutorServer):
         response.timeout = None
         return response
 
-    async def sse_channel_ensure(self):
-        return await self.sse_channel('ensure')
+    async def sse_channel_create(self):
+        return await self.sse_channel('create')
 
     async def sse_channel_delete(self):
         return await self.sse_channel('delete')
@@ -517,8 +517,8 @@ def create_app(
     )
 
     app.add_url_rule(
-        '/api/v1/stream/ensure',
-        view_func=rest_executor.sse_channel_ensure, methods=['GET'])
+        '/api/v1/stream/create',
+        view_func=rest_executor.sse_channel_create, methods=['GET'])
     app.add_url_rule(
         '/api/v1/stream/delete',
         view_func=rest_executor.sse_channel_delete, methods=['GET'])

@@ -179,7 +179,7 @@ class ExecutorServer(ExecutorServerBase):
             obj, hash_name, *args, **kwargs)
 
         if self.stream_changes:
-            self.post_stream_channel(data, 'ensure', hash_name)
+            self.post_stream_channel(data, 'create', hash_name)
         return obj
 
     async def _delete_instance(self, data: dict) -> Any:

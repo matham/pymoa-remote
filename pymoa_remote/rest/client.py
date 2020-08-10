@@ -287,10 +287,10 @@ class RestExecutor(Executor):
 
     @contextlib.asynccontextmanager
     async def get_channel_from_remote(
-            self, obj: Optional[Any], channel: str,
+            self, hash_name: str, channel: str,
             task_status=TASK_STATUS_IGNORED
     ) -> AsyncContextManager[AsyncGenerator]:
-        data = self._get_remote_object_channel_data(obj, channel)
+        data = self._get_remote_object_channel_data(hash_name, channel)
         data = self.encode(data)
 
         if not channel:
