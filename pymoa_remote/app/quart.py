@@ -524,8 +524,14 @@ def create_app(
     return app
 
 
-async def start_app(app, host='127.0.0.1', port=5000):
+async def start_app(
+        app, host='127.0.0.1', port=5000,
+        task_status=trio.TASK_STATUS_IGNORED):
+    async def before_first():
+        task_status.started()
     # start/stop thread executor
+    app.before_serving(before_first)
+
     executor = app.rest_executor.executor
     async with executor:
         with ExecutorContext(executor):

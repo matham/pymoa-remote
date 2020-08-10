@@ -1,15 +1,26 @@
 import pytest
 import trio
+from trio import socket
+
+
+async def get_socket_port(server):
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    await s.bind((server, 0))
+    s.listen(1)
+    port = s.getsockname()[1]
+    s.close()
+    return port
 
 
 @pytest.fixture
 async def quart_app(nursery):
     from pymoa_remote.app.quart import create_app, start_app
     app = create_app()
-    nursery.start_soon(start_app, app)
-    await trio.sleep(.01)
+    port = await get_socket_port('localhost')
+    app.pymoa_port = port
 
     async with app.app_context():
+        await nursery.start(start_app, app, 'localhost', port)
         yield app
 
 
@@ -17,7 +28,8 @@ async def quart_app(nursery):
 async def quart_rest_executor(quart_app):
     from pymoa_remote.rest.client import RestExecutor
     from pymoa_remote.client import ExecutorContext
-    async with RestExecutor(uri='http://127.0.0.1:5000') as executor:
+    async with RestExecutor(
+            uri=f'http://localhost:{quart_app.pymoa_port}') as executor:
         with ExecutorContext(executor):
             yield executor
 
@@ -27,7 +39,8 @@ async def quart_socket_executor(quart_app, nursery):
     from pymoa_remote.socket.websocket_client import WebSocketExecutor
     from pymoa_remote.client import ExecutorContext
     async with WebSocketExecutor(
-            nursery=nursery, server='127.0.0.1', port=5000) as executor:
+            nursery=nursery, server='localhost',
+            port=quart_app.pymoa_port) as executor:
         with ExecutorContext(executor):
             yield executor
 
@@ -47,7 +60,7 @@ async def process_executor():
         MultiprocessSocketExecutor
     from pymoa_remote.client import ExecutorContext
     async with MultiprocessSocketExecutor(
-            server='127.0.0.1', allow_import_from_main=True) as executor:
+            server='localhost', allow_import_from_main=True) as executor:
         with ExecutorContext(executor):
             yield executor
 
