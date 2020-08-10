@@ -201,15 +201,27 @@ class QuartRestServer(SimpleExecutorServer):
 
     async def sse_channel(self, channel):
         # todo: send alive with timeout in case skipped packets
+        msg = None
+        try:
+            req_data = (await request.get_data()).decode('utf8')
+            req_data = self.decode(req_data)
+        except Exception as e:
+            msg = {'exception': serialize_exception(e)}
+
         async def send_events():
+            if msg is not None:
+                data = self.encode(msg)
+                id_data = json.dumps((None, None, None))
+
+                message = f"data: {data}\nid: {id_data}\n\n"
+                yield message.encode('utf-8')
+                return
+
             queue = MaxSizeErrorDeque(max_size=MAX_QUEUE_SIZE)
             client_key = object()
             hash_key = None
 
             try:
-                req_data = (await request.get_data()).decode('utf8')
-                req_data = self.decode(req_data)
-
                 hash_key = channel, req_data['hash_name']
                 self.stream_clients[hash_key][client_key] = queue
 
