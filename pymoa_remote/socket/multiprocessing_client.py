@@ -7,6 +7,7 @@ import trio
 import os
 import sys
 from typing import Optional
+import time
 
 from pymoa_remote.socket.client import SocketExecutor
 
@@ -51,7 +52,7 @@ class MultiprocessSocketExecutor(SocketExecutor):
         port = self.port
         if not port:
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            await s.bind(("", 0))
+            await s.bind((self.server, 0))
             s.listen(1)
             port = self.port = s.getsockname()[1]
             s.close()
@@ -60,12 +61,25 @@ class MultiprocessSocketExecutor(SocketExecutor):
         env['KIVY_NO_ARGS'] = '1'
         self._process = await trio.open_process(
             [sys.executable, '-m', 'pymoa_remote.app.multiprocessing',
+             '--host', str(self.server),
              '--port', str(port),
              '--stream_changes', str(self.stream_changes),
              '--remote_class_registration',
              str(self.allow_remote_class_registration),
              '--import_from_main', str(self.allow_import_from_main)],
             env=env)
+
+        # wait until the process is ready
+        ts = time.perf_counter()
+        while True:
+            try:
+                async with self.create_socket_context():
+                    break
+            except OSError:
+                if time.perf_counter() - ts >= 5:
+                    raise
+                await trio.sleep(.01)
+
         await super(MultiprocessSocketExecutor, self).start_executor()
 
     async def stop_executor(self, block=True):
