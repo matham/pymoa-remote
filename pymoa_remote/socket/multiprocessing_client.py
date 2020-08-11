@@ -32,7 +32,8 @@ class MultiprocessSocketExecutor(SocketExecutor):
     allow_import_from_main = False
 
     def __init__(
-            self, server: str = '', port: int = 0, stream_changes=True,
+            self, server: str = 'localhost', port: int = 0,
+            stream_changes=True,
             allow_remote_class_registration=True,
             allow_import_from_main=False, **kwargs):
         super(MultiprocessSocketExecutor, self).__init__(**kwargs)
@@ -92,9 +93,12 @@ class MultiprocessSocketExecutor(SocketExecutor):
 
             with trio.CancelScope(shield=True):
                 # todo: handle here and for quart in case process is dead
-                data = self.encode({'eof': True})
-                async with self.create_socket_context() as sock:
-                    await self.write_socket(data, sock)
+                try:
+                    data = self.encode({'eof': True})
+                    async with self.create_socket_context() as sock:
+                        await self.write_socket(data, sock)
 
-                await self._process.aclose()
-                self._process = None
+                finally:
+                    with trio.CancelScope(shield=True):
+                        await self._process.aclose()
+                        self._process = None
