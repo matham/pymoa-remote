@@ -145,6 +145,43 @@ async def test_execute_generate(executor: ExecutorBase):
         assert changes['method_gen'][0] == n + 6
 
 
+async def test_execute_generate_break(executor: ExecutorBase):
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    values = list(range(5)) + ['hello'] + list(range(5))
+
+    async with executor.remote_instance(device, 'some_device'):
+        # make sure breaking in the middle of a gen doesn't break anything so
+        # try it multiple times
+        for i in range(1, 4):
+            g0 = device.changes['method_gen'][0]
+            changes = await device.get_changes()
+            g1 = changes['method_gen'][0]
+            g2 = changes['callback'][0]
+            count = 0
+
+            async with device.generate_data(values) as aiter:
+                async for value in aiter:
+                    assert value == values[count] * 2
+
+                    if count == 5:
+                        break
+                    count += 1
+
+            # the gen maybe called more times than the client read (as many
+            # times as the buffer allows), but the callback must wait
+            assert device.changes['callback'][0] == i * 6
+            if executor.is_remote:
+                assert device.changes['method_gen'][0] == 0
+            else:
+                assert device.changes['method_gen'][0] - g0 >= 6
+
+            changes = await device.get_changes()
+            assert changes['callback'][0] - g2 >= 6
+            assert changes['method_gen'][0] - g1 >= 6
+
+
 async def test_properties(executor: ExecutorBase):
     from pymoa_remote.tests.device import RandomDigitalChannel
 
