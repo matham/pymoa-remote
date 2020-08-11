@@ -2,7 +2,10 @@ from pymoa_remote.socket.multiprocessing_client import \
     MultiprocessSocketExecutor
 from pymoa_remote.client import apply_executor, ExecutorContext, \
     apply_generator_executor
+from pymoa_remote.rest.client import RestExecutor
+from pymoa_remote.app.quart import create_app, start_app
 import trio
+from async_generator import aclosing
 from os import getpid
 
 
@@ -27,7 +30,7 @@ class Demo:
             yield new_value
 
 
-async def do_demo(executor: MultiprocessSocketExecutor):
+async def do_demo(executor: RestExecutor):
     demo = Demo()
     pid = getpid()
 
@@ -46,12 +49,35 @@ async def do_demo(executor: MultiprocessSocketExecutor):
         await demo.crash()
 
 
-async def main():
-    async with MultiprocessSocketExecutor(
-            server='127.0.0.1', allow_import_from_main=True) as executor:
+async def main_external_server(host, port):
+    """To use an external server, start the server as follows::
+
+        pymoa_quart_app-script.py --import_from_main 1 --host 127.0.0.1 \
+--port 5000
+
+    Then start this function with the appropriate host and port.
+    """
+    async with RestExecutor(uri=f'{host}:{port}') as executor:
         with ExecutorContext(executor):
             await do_demo(executor)
 
 
+async def main_internal_server():
+    app = create_app(allow_import_from_main=True)
+
+    async with app.app_context():
+        nursery: trio.Nursery
+        async with trio.open_nursery() as nursery:
+            await nursery.start(start_app, app, '127.0.0.1', 5001)
+
+            async with RestExecutor(uri=f'http://127.0.0.1:5001') as executor:
+                with ExecutorContext(executor):
+                    await do_demo(executor)
+
+            nursery.cancel_scope.cancel()
+
+
 if __name__ == '__main__':
-    trio.run(main)
+    trio.run(main_internal_server)
+    # to use the external server, it must first be started
+    # trio.run(main_external_server, 'http://127.0.0.1', 5000)
