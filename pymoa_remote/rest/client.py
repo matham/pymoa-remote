@@ -17,6 +17,7 @@ from pymoa_remote.rest import SSEStream
 from pymoa_remote.client import Executor
 from pymoa_remote.executor import NO_CALLBACK
 from pymoa_remote.exception import raise_remote_exception_from_frames
+from pymoa_remote.utils import asynccontextmanager
 
 __all__ = ('RestExecutor', )
 
@@ -244,7 +245,7 @@ class RestExecutor(Executor):
                 ret_data['data'] = self.decode(ret_data['data'])
                 yield ret_data
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
@@ -287,7 +288,7 @@ class RestExecutor(Executor):
         await self._apply_data_from_remote(
             obj, self._generate_sse_events(response, task_status))
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def get_channel_from_remote(
             self, hash_name: str, channel: str,
             task_status=TASK_STATUS_IGNORED

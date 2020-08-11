@@ -22,6 +22,7 @@ from tree_config import read_config_from_object, apply_config
 
 from pymoa_remote.executor import NO_CALLBACK
 from pymoa_remote.client import Executor
+from pymoa_remote.utils import asynccontextmanager
 
 
 __all__ = (
@@ -184,7 +185,7 @@ class ThreadExecutor(Executor):
             self, obj: Any, properties: List[str]):
         raise NotImplementedError
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
@@ -202,7 +203,7 @@ class ThreadExecutor(Executor):
             task_status=TASK_STATUS_IGNORED):
         raise NotImplementedError
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def get_channel_from_remote(
             self, hash_name: str, channel: str,
             task_status=TASK_STATUS_IGNORED

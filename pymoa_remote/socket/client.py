@@ -14,6 +14,7 @@ from tree_config import apply_config
 from pymoa_remote.client import Executor
 from pymoa_remote.executor import NO_CALLBACK
 from pymoa_remote.exception import raise_remote_exception_from_frames
+from pymoa_remote.utils import asynccontextmanager
 
 __all__ = ('SocketExecutor', )
 
@@ -48,7 +49,7 @@ class SocketExecutor(Executor):
         self.server = server
         self.port = port
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def _create_socket_context(self) -> AsyncContextManager[SocketStream]:
         sock = await open_tcp_stream(self.server, self.port)
         try:
@@ -297,7 +298,7 @@ class SocketExecutor(Executor):
                 print('yielding', ret_data)
                 yield ret_data
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def get_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
             triggered_logged_names: Iterable[str] = (),
@@ -328,7 +329,7 @@ class SocketExecutor(Executor):
         await self._apply_data_from_remote(
             obj, self._generate_stream_events(data, task_status))
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def get_channel_from_remote(
             self, hash_name: str, channel: str,
             task_status=TASK_STATUS_IGNORED

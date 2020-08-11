@@ -7,9 +7,13 @@ import trio
 import math
 from threading import get_ident, Lock
 from collections import deque
+import contextlib
+import sys
+from functools import wraps
 
 __all__ = (
-    'QueueFull', 'get_class_bases', 'MaxSizeSkipDeque', 'MaxSizeErrorDeque')
+    'QueueFull', 'get_class_bases', 'MaxSizeSkipDeque', 'MaxSizeErrorDeque',
+    'asynccontextmanager')
 
 
 class QueueFull(Exception):
@@ -158,3 +162,62 @@ class MaxSizeErrorDeque:
             self._send_nowait()
         else:
             self.token.run_sync_soon(self._send_nowait)
+
+
+# Derived from the one in contextlib
+# So this is a derivative work licensed under the PSF License, which requires
+# the following notice:
+#
+# Copyright © 2001-2020 Python Software Foundation; All Rights Reserved
+class _PyMoaAsyncGeneratorContextManager(
+    contextlib._AsyncGeneratorContextManager):
+
+    async def __aexit__(self, typ, value, traceback):
+        if typ is None:
+            try:
+                await self.gen.__anext__()
+            except StopAsyncIteration:
+                return
+            else:
+                raise RuntimeError("generator didn't stop")
+        else:
+            if value is None:
+                value = typ()
+            # See _GeneratorContextManager.__exit__ for comments on subtleties
+            # in this implementation
+            try:
+                await self.gen.athrow(typ, value, traceback)
+                if not isinstance(value, GeneratorExit):
+                    raise RuntimeError("generator didn't stop after throw()")
+            except StopAsyncIteration as exc:
+                return exc is not value
+            except RuntimeError as exc:
+                if exc is value:
+                    return False
+                # Avoid suppressing if a StopIteration exception
+                # was passed to throw() and later wrapped into a RuntimeError
+                # (see PEP 479 for sync generators; async generators also
+                # have this behavior). But do this only if the exception
+                # wrapped by the RuntimeError is actully Stop(Async)Iteration
+                # (see issue29692).
+                if isinstance(value, (StopIteration, StopAsyncIteration)):
+                    if exc.__cause__ is value:
+                        return False
+                raise
+            except BaseException as exc:
+                if exc is not value:
+                    raise
+
+
+if sys.version_info[:2] >= (3, 8):
+    asynccontextmanager = contextlib.asynccontextmanager
+else:
+    def asynccontextmanager(func):
+        """@asynccontextmanager decorator, the same as
+        ``contextlib.asynccontextmanager``, but with with
+        https://bugs.python.org/issue33786 fixed for 3.7.
+        """
+        @wraps(func)
+        def helper(*args, **kwds):
+            return _PyMoaAsyncGeneratorContextManager(func, args, kwds)
+        return helper

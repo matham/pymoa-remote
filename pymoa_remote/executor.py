@@ -8,6 +8,8 @@ from functools import partial
 from trio import TASK_STATUS_IGNORED
 import base64
 
+from pymoa_remote.utils import asynccontextmanager
+
 __all__ = (
     'NO_CALLBACK', 'ExecutorBase', 'InstanceRegistry')
 
@@ -97,7 +99,7 @@ class ExecutorBase:
         # todo: add method to check if class is registered (maybe?)
         raise NotImplementedError
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     async def remote_instance(
             self, obj, hash_name, *args, auto_register_class=True, **kwargs
     ) -> AsyncContextManager[Any]:

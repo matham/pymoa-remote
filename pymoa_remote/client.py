@@ -1,6 +1,5 @@
 from typing import Optional, Any, List, Iterable
 import uuid
-import contextlib
 import trio
 import os
 from async_generator import aclosing
@@ -11,6 +10,7 @@ from tree_config import read_config_from_object
 from contextvars import ContextVar
 
 from pymoa_remote.executor import ExecutorBase, InstanceRegistry
+from pymoa_remote.utils import asynccontextmanager
 
 __all__ = (
     'ExecutorContext', 'apply_executor', 'apply_generator_executor',
@@ -315,7 +315,7 @@ def apply_generator_executor(func=None, callback=None):
             f'"{func}". apply_generator_executor only supports generators. '
             f'Please use apply_executor instead')
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     @wraps(func)
     async def wrapper_gen(self, *args, **kwargs):
         executor: Executor = getattr(
@@ -344,7 +344,7 @@ def apply_generator_executor(func=None, callback=None):
         async with aclosing(gen) as aiter:
             yield aiter
 
-    @contextlib.asynccontextmanager
+    @asynccontextmanager
     @wraps(func)
     async def wrapper_coro_gen(self, *args, **kwargs):
         executor: Executor = getattr(
