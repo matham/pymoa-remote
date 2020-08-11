@@ -13,6 +13,7 @@ import argparse
 import json
 import os
 import trio
+from trio import BrokenResourceError
 
 from pymoa_remote.threading import ThreadExecutor
 from pymoa_remote.utils import MaxSizeErrorDeque
@@ -336,7 +337,11 @@ class QuartSocketServer(SimpleExecutorServer):
                     async with aclosing(self.execute_generator(data)) as aiter:
                         async for res in aiter:
                             ret_data['data'] = res
-                            await websocket.send(self.encode(ret_data))
+                            try:
+                                await websocket.send(self.encode(ret_data))
+                            except BrokenResourceError:
+                                # client closed
+                                return
 
                     res = None
                     ret_data['done_execute'] = True
@@ -426,12 +431,18 @@ class QuartSocketServer(SimpleExecutorServer):
         data = self.decode_json_buffers(await websocket.receive())
         channel = data.get('stream', None)
 
-        if channel is None:
-            await self.websocket_handler()
-        elif channel == 'data':
-            await self.websocket_data_stream_handler(data['data'])
-        else:
-            await self.websocket_stream_handler(channel, data['data'])
+        try:
+            if channel is None:
+                await self.websocket_handler()
+            elif channel == 'data':
+                await self.websocket_data_stream_handler(data['data'])
+            else:
+                await self.websocket_stream_handler(channel, data['data'])
+        except BrokenResourceError:
+            # if channel is None, all errors are caught and sent to client.
+            # Otherwise, and errors when channel != None are a client socket
+            # issue so we can just drop it
+            pass
 
 
 def handle_unexpected_error(error):
@@ -455,6 +466,8 @@ def create_app(
 ) -> QuartTrio:
     """Creates the quart app.
     """
+    # todo prevent server crashing from any user exceptions or from
+    #  connections closing etc. Same for multiprocessing
     global MAX_QUEUE_SIZE
     MAX_QUEUE_SIZE = max_queue_size
 

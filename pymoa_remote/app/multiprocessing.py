@@ -7,7 +7,8 @@ from collections import defaultdict
 from async_generator import aclosing
 import argparse
 import trio
-from trio import socket, SocketStream, SocketListener, serve_listeners
+from trio import socket, SocketStream, SocketListener, serve_listeners, \
+    BrokenResourceError
 
 from pymoa_remote.utils import MaxSizeErrorDeque
 from pymoa_remote.threading import ThreadExecutor
@@ -99,8 +100,11 @@ async def socket_handler(executor: ProcessSocketServer, stream: SocketStream):
                     # if this raises an error it stops the underlying generator
                     async for res in aiter:
                         ret_data['data'] = res
-                        await executor.write_socket(
-                            executor.encode(ret_data), stream)
+                        try:
+                            await executor.write_socket(
+                                executor.encode(ret_data), stream)
+                        except BrokenResourceError:
+                            return
 
                 res = None
                 ret_data['done_execute'] = True
@@ -117,6 +121,7 @@ async def socket_handler(executor: ProcessSocketServer, stream: SocketStream):
 
             ret_data['data'] = res
             encoded_ret = executor.encode(ret_data)
+
         except Exception as e:
             # todo: ignore write_socket in generator
             ret_data = {'exception': serialize_exception(e)}
@@ -218,13 +223,20 @@ async def serve(
 
         channel = data.get('stream', None)
 
-        if channel is None:
-            await socket_handler(executor, stream)
-        elif channel == 'data':
-            await socket_data_stream_handler(executor, stream, data['data'])
-        else:
-            await socket_stream_handler(
-                executor, stream, channel, data['data'])
+        try:
+            if channel is None:
+                await socket_handler(executor, stream)
+            elif channel == 'data':
+                await socket_data_stream_handler(
+                    executor, stream, data['data'])
+            else:
+                await socket_stream_handler(
+                    executor, stream, channel, data['data'])
+        except BrokenResourceError:
+            # if channel is None, all errors are caught and sent to client.
+            # Otherwise, and errors when channel != None are a client socket
+            # issue so we can just drop it
+            pass
 
     with ExecutorContext(thread_executor):
         async with thread_executor:
