@@ -6,6 +6,7 @@
 # todo: immediately close connection for sse/stream if full
 from quart_trio import QuartTrio
 from quart import make_response, request, jsonify, websocket
+from quart_trio.response import TrioIterableBody
 from functools import wraps
 from collections import defaultdict
 from async_generator import aclosing
@@ -48,6 +49,15 @@ def convert_io(func):
             encoded, {'Content-Type': 'application/json'})
 
     return inner
+
+
+class TrioIterableBodyExit(TrioIterableBody):
+
+    async def __aexit__(self, *args, **kwargs) -> None:
+        # fix until https://gitlab.com/pgjones/quart/-/merge_requests/91
+        await self.iter.aclose()
+        return await super(TrioIterableBodyExit, self).__aexit__(
+            *args, **kwargs)
 
 
 class QuartRestServer(SimpleExecutorServer):
@@ -117,7 +127,7 @@ class QuartRestServer(SimpleExecutorServer):
                 yield message.encode('utf-8')
 
         response = await make_response(
-            send_events(),
+            TrioIterableBodyExit(send_events()),
             {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
@@ -190,7 +200,7 @@ class QuartRestServer(SimpleExecutorServer):
                 yield message.encode('utf-8')
 
         response = await make_response(
-            send_events(),
+            TrioIterableBodyExit(send_events()),
             {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
@@ -258,7 +268,7 @@ class QuartRestServer(SimpleExecutorServer):
                         del self.stream_clients[hash_key]
 
         response = await make_response(
-            send_events(),
+            TrioIterableBodyExit(send_events()),
             {
                 'Content-Type': 'text/event-stream',
                 'Cache-Control': 'no-cache',
