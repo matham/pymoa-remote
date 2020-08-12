@@ -307,9 +307,9 @@ def apply_generator_executor(func=None, callback=None):
     if func is None:
         return partial(apply_generator_executor, callback=callback)
 
-    is_coro = iscoroutinefunction(func)
+    is_coro = isasyncgenfunction(func)
 
-    if not isgeneratorfunction(func) and not isasyncgenfunction(func):
+    if not isgeneratorfunction(func) and not is_coro:
         raise ValueError(
             f'apply_generator_executor called with non-generator function '
             f'"{func}". apply_generator_executor only supports generators. '
