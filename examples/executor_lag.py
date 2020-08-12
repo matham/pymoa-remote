@@ -3,14 +3,10 @@ import trio
 import time
 
 from pymoa_remote.app.quart import create_app, start_app
-from pymoa_remote.rest.client import RestExecutor
-from pymoa_remote.threading import ThreadExecutor
-from pymoa_remote.socket.websocket_client import WebSocketExecutor
-from pymoa_remote.socket.multiprocessing_client import \
-    MultiprocessSocketExecutor
-from pymoa_remote.client import apply_executor, apply_generator_executor, \
-    ExecutorContext
 from pymoa_remote.executor import ExecutorBase
+from pymoa_remote import RestExecutor, ThreadExecutor, WebSocketExecutor, \
+    MultiprocessSocketExecutor, apply_executor, apply_generator_executor, \
+    ExecutorContext
 
 # monkey patch so we can test async, whatever part is supported
 ExecutorBase.supports_coroutine = True

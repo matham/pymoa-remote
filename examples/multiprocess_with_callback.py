@@ -1,7 +1,5 @@
-from pymoa_remote.socket.multiprocessing_client import \
-    MultiprocessSocketExecutor
-from pymoa_remote.client import apply_executor, ExecutorContext, \
-    apply_generator_executor
+from pymoa_remote import MultiprocessSocketExecutor, apply_executor, \
+    ExecutorContext, apply_generator_executor
 import trio
 from os import getpid
 from threading import get_ident
