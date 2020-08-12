@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 from io import open
 from os import path
 
-from pymoa_remote import __version__
+exec(open("pymoa_remote/_version.py", encoding="utf-8").read())
 
 here = path.abspath(path.dirname(__file__))
 

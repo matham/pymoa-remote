@@ -6,8 +6,7 @@ Raspberry Pi, in another process, or another local thread.
 
 """
 
-__version__ = '0.1.0.dev0'
-
+from pymoa_remote._version import __version__
 from pymoa_remote.client import ExecutorContext, apply_executor, \
     apply_generator_executor
 from pymoa_remote.exception import RemoteException
