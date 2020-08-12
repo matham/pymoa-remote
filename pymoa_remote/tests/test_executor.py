@@ -475,3 +475,65 @@ async def test_uuid(
     }
 
     assert len(uuids) == 4
+
+
+async def test_data_streaming(remote_executor: ExecutorBase, nursery):
+    from pymoa_remote.tests.device import BoundChannel
+
+    hash_0, hash_1 = 'first device', 'second device'
+    log = []
+    expected = []
+
+    def add_expected(hash_name, initial=False, **items):
+        item = {
+            'hash_name': hash_name,
+            'logged_items': {},
+            'logged_trigger_name': None,
+            'logged_trigger_value': None
+        }
+        item['initial_properties' if initial else 'logged_items'] = items
+        expected.append({'data': item})
+
+    async def stream_data(obj, task_status=trio.TASK_STATUS_IGNORED):
+        async with remote_executor.get_data_from_remote(
+                obj, logged_names=['name', 'on_event'],
+                initial_properties=['name', ],
+                task_status=task_status) as aiter:
+            async for val in aiter:
+                log.append(val)
+
+    device_0 = BoundChannel()
+    async with remote_executor.remote_instance(device_0, hash_0):
+        await nursery.start(stream_data, device_0)
+        add_expected(hash_0, name=55, initial=True)
+
+        await device_0.set_name('troy')
+        add_expected(hash_0, name='troy')
+        await device_0.dispatch_event('troy')
+        add_expected(hash_0, on_event=['troy'])
+
+        device_1 = BoundChannel()
+        async with remote_executor.remote_instance(device_1, hash_1):
+            await nursery.start(stream_data, device_1)
+            add_expected(hash_1, name=55, initial=True)
+
+            await device_1.dispatch_event('apple')
+            add_expected(hash_1, on_event=['apple'])
+            await device_1.set_name('apple')
+            add_expected(hash_1, name='apple')
+
+            await device_0.dispatch_event('helen')
+            add_expected(hash_0, on_event=['helen'])
+            await device_0.set_name('helen')
+            add_expected(hash_0, name='helen')
+            await device_1.set_name('pie')
+            add_expected(hash_1, name='pie')
+            await device_1.dispatch_event('pie')
+            add_expected(hash_1, on_event=['pie'])
+
+        await device_0.set_name('uh greek')
+        add_expected(hash_0, name='uh greek')
+        await device_0.dispatch_event('uh greek')
+        add_expected(hash_0, on_event=['uh greek'])
+
+    assert log == expected

@@ -109,3 +109,63 @@ class RandomDigitalChannel:
     def set_supports_coroutine(self, value):
         # monkey patch so we can test async, whatever part is supported
         ExecutorBase.supports_coroutine = value
+
+
+class BoundChannel:
+
+    _counter = 0
+
+    _name = 55
+
+    _name_callbacks = {}
+
+    _event_callbacks = {}
+
+    def __init__(self, **kwargs):
+        super(BoundChannel, self).__init__(**kwargs)
+        self._name_callbacks = {}
+        self._event_callbacks = {}
+
+    @property
+    def name(self):
+        return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+        for f, args, kwargs in self._name_callbacks.values():
+            f(*args, self, value, **kwargs)
+
+    @apply_executor
+    def set_name(self, value):
+        self.name = value
+
+    @apply_executor
+    def dispatch_event(self, value):
+        self.dispatch('on_event', self, value)
+
+    def dispatch(self, name, *dispatch_args):
+        if name != 'on_event':
+            raise ValueError(name)
+
+        for f, args, kwargs in self._event_callbacks.values():
+            f(*args, *dispatch_args, **kwargs)
+
+    def fbind(self, name, callback, *args, **kwargs):
+        self._counter += 1
+
+        if name == 'name':
+            self._name_callbacks[self._counter] = (callback, args, kwargs)
+        elif name == 'on_event':
+            self._event_callbacks[self._counter] = (callback, args, kwargs)
+        else:
+            raise ValueError(name)
+        return self._counter
+
+    def unbind_uid(self, name, uid):
+        if name == 'name':
+            del self._name_callbacks[uid]
+        elif name == 'on_event':
+            del self._event_callbacks[uid]
+        else:
+            raise ValueError(name)
