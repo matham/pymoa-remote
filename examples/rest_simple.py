@@ -1,5 +1,5 @@
 from pymoa_remote import apply_executor, ExecutorContext, \
-    apply_generator_executor,  RestExecutor
+    apply_generator_executor, RestExecutor
 from pymoa_remote.app.quart import create_app, start_app
 import trio
 from os import getpid
