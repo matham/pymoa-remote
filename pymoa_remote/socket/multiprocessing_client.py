@@ -1,5 +1,5 @@
-"""Multiprocessing Socket Client
-=================================
+"""Multiprocessing Socket Executor
+==================================
 
 """
 from trio import socket

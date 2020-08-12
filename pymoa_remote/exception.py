@@ -1,3 +1,7 @@
+"""Exception
+=============
+
+"""
 import traceback
 from types import CodeType
 

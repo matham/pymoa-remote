@@ -1,5 +1,5 @@
-"""Client
-=========
+"""REST Executor
+================
 
 """
 from typing import AsyncGenerator, Tuple, Optional, Union, Callable, Any, \

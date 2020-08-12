@@ -1,3 +1,7 @@
+"""Server Side Executor
+=======================
+
+"""
 from typing import Dict, List, Any, Callable, Tuple, Set, AsyncGenerator, \
     Iterable, Optional
 from async_generator import aclosing

@@ -1,5 +1,5 @@
-"""Websocket Client
-===================
+"""WebSocket Executor
+=====================
 
 """
 from trio_websocket import connect_websocket_url, WebSocketConnection, \

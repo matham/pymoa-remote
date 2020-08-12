@@ -1,5 +1,5 @@
-"""Threading
-=============
+"""Threading Executor
+=====================
 """
 
 from typing import Tuple, AsyncGenerator, Union, Callable, Optional, Dict, \

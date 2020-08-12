@@ -1,5 +1,5 @@
-"""Rest
-========
+"""REST SSE Client
+==================
 
 """
 import re

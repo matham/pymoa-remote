@@ -1,3 +1,7 @@
+"""Executor Client API
+=======================
+
+"""
 from typing import Optional, Any, List, Iterable
 import uuid
 import trio
@@ -19,12 +23,54 @@ __all__ = (
 
 current_executor: ContextVar[Optional['Executor']] = ContextVar(
     'current_executor', default=None)
+"""The global context variables that track the active executor in the current
+context.
+
+This is not set directly, instead use :class:`ExecutorContext`.
+"""
 
 
 class ExecutorContext:
-    # todo: use this in decorator
+    """Context manager that sets the executor to be used when a executor
+    decorated method is called. E.g. given:
+
+    .. code-block:: python
+
+        class Demo:
+
+            @apply_executor
+            def sum(self, a, b):
+                return a + b
+
+    When calling ``result = await demo.sum(1, 2)``, since no executor is
+    set, the method will be executed locally. :class:`ExecutorContext` sets the
+    current executor e.g.:
+
+    .. code-block:: python
+
+        with ExecutorContext(executor):
+            result = await demo.sum(1, 2)
+
+    will use the ``executor`` to execute ``sum`` remotely with that executor.
+    Multiple executors can be used as needed e.g.:
+
+    .. code-block:: python
+
+        with ExecutorContext(executor_1):
+            result1 = await demo.sum(1, 2)
+
+            with ExecutorContext(executor_2):
+                result2 = await demo.sum(1, 2)
+
+            result3 = await demo.sum(1, 2)
+
+    will use ``executor_1`` to compute ``result1`` and ``result3`` and
+    ``executor_2`` for ``result2``.
+    """
 
     executor: 'Executor'
+    """The context's executor.
+    """
 
     token = None
 
@@ -45,9 +91,14 @@ class ExecutorContext:
 
 
 class Executor(ExecutorBase):
-    """Concrete executor that will execute objects remotely."""
+    """Executor base class used by all the clients.
+
+    Adds internal API used by the clients to help it have a uniform public API.
+    """
 
     registry: 'LocalRegistry' = None
+    """The registry that tracks registered objects and classes.
+    """
 
     _uuid: bytes = None
 
@@ -58,10 +109,14 @@ class Executor(ExecutorBase):
         self.registry = registry
         self._uuid = uuid.uuid4().bytes
 
-    def encode(self, data):
+    def encode(self, data: Any) -> str:
+        """Encodes the data as required by the specific executor.
+        """
         return self.registry.encode_json(data)
 
-    def decode(self, data):
+    def decode(self, data: str) -> Any:
+        """Decodes the data encoded with :meth:`encode`.
+        """
         return self.registry.decode_json(data)
 
     def _get_remote_import_data(self, module):
@@ -239,6 +294,14 @@ class LocalRegistry(InstanceRegistry):
     """
 
     def add_instance(self, obj, hash_name):
+        """Registers the object using the given name.
+
+        :param obj: The object to register
+        :param hash_name: The name to use to identify this object by the
+            executor and its remote server (if applicable).
+        :return: The object.
+        :raises: ValueError if the name is already registered.
+        """
         if hash_name in self.hashed_instances:
             raise ValueError(f'Object <{obj}, {hash_name}> already exists')
 
@@ -247,13 +310,25 @@ class LocalRegistry(InstanceRegistry):
         return obj
 
     def delete_instance(self, obj):
+        """Removes the previously registered object.
+
+        :param obj: The object previously registered with :meth:`add_instance`.
+        :return: The object.
+        """
         hash_name = self.hashed_instances_ids.pop(id(obj))
         del self.hashed_instances[hash_name]
         return obj
 
 
 def apply_executor(func=None, callback=None):
-    """Decorator that calls the method using the executor.
+    """Decorator that will cause the method to be executed remotely using
+    the currently active executor and return its value.
+
+    :param func: The method to be decorated.
+    :param callback: The optional callback that will be executed with the
+        method result. This can be specified as a string or method, but it must
+        be a method of the same class.
+    :return: The decorated method.
     """
     if func is None:
         return partial(apply_executor, callback=callback)
