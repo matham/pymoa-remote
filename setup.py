@@ -2,6 +2,8 @@ from setuptools import setup, find_packages
 from io import open
 from os import path
 
+# __version__ is imported by exec, but help linter not complain
+__version__ = None
 exec(open("pymoa_remote/_version.py", encoding="utf-8").read())
 
 here = path.abspath(path.dirname(__file__))
