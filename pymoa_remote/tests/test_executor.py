@@ -397,11 +397,11 @@ async def test_stream_channel_create_delete(
     create_msg = {
         ('data', ): {
             'auto_register_class': True,
-           'cls_name': 'RandomDigitalChannel',
-           'hash_name': '',
-           'mod_filename': None,
-           'module': 'pymoa_remote.tests.device',
-           'qual_name': 'RandomDigitalChannel',
+            'cls_name': 'RandomDigitalChannel',
+            'hash_name': '',
+            'mod_filename': None,
+            'module': 'pymoa_remote.tests.device',
+            'qual_name': 'RandomDigitalChannel',
         },
         'hash_name': '',
         'stream': 'create'

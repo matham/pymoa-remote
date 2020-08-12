@@ -70,7 +70,7 @@ async def main_internal_server():
         async with trio.open_nursery() as nursery:
             await nursery.start(start_app, app, '127.0.0.1', 5001)
 
-            async with RestExecutor(uri=f'http://127.0.0.1:5001') as executor:
+            async with RestExecutor(uri='http://127.0.0.1:5001') as executor:
                 with ExecutorContext(executor):
                     await do_demo(executor)
 
