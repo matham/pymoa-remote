@@ -155,7 +155,25 @@ class QuartRestServer(SimpleExecutorServer):
 
     async def sse_data(self):
         # todo: send alive with timeout in case skipped packets
+        # todo: make sure in all the apps decoding will raise user
+        #  error, not system error like here
+        # we must read here in the view function, otherwise the request is gone
+        msg = None
+        try:
+            req_data = (await request.get_data()).decode('utf8')
+            req_data = self.decode(req_data)
+        except Exception as e:
+            msg = {'exception': serialize_exception(e)}
+
         async def send_events():
+            if msg is not None:
+                data = self.encode(msg)
+                id_data = json.dumps((None, ))
+
+                message = f"data: {data}\nid: {id_data}\n\n"
+                yield message.encode('utf-8')
+                return
+
             queue = MaxSizeErrorDeque(max_size=MAX_QUEUE_SIZE)
 
             def add_to_queue(item):
@@ -163,11 +181,6 @@ class QuartRestServer(SimpleExecutorServer):
                 queue.add_item(encoded_data, len(encoded_data))
 
             try:
-                # todo: make sure in all the apps decoding will raise user
-                #  error, not system error like here
-                req_data = (await request.get_data()).decode('utf8')
-                req_data = self.decode(req_data)
-
                 binding, initial = await self.start_logging_object_data(
                     req_data, add_to_queue)
 
@@ -213,6 +226,7 @@ class QuartRestServer(SimpleExecutorServer):
 
     async def sse_channel(self, channel):
         # todo: send alive with timeout in case skipped packets
+        # we must read here in the view function, otherwise the request is gone
         msg = None
         try:
             req_data = (await request.get_data()).decode('utf8')
