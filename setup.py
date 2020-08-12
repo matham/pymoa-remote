@@ -32,14 +32,13 @@ setup(
         'Programming Language :: Python :: 3.8',
     ],
     packages=find_packages(),
-    install_requires=['trio', 'outcome', 'tree_config'],
+    install_requires=['trio', 'outcome', 'tree_config', 'async_generator'],
     extras_require={
         'dev': [
             'pytest>=3.6', 'pytest-cov', 'flake8', 'sphinx-rtd-theme',
             'coveralls', 'pytest-trio', 'sphinxcontrib-trio'],
         'network': [
-            'quart', 'quart-trio', 'asks', 'trio-websocket',
-            'async_generator'],
+            'quart', 'quart-trio', 'asks', 'trio-websocket'],
     },
     package_data={
         'pymoa_remote':
