@@ -102,6 +102,91 @@ async def test_execute(executor: ExecutorBase):
         assert changes['method'][0] == 2
 
 
+async def test_execute_no_executor():
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    assert not device.changes['callback'][0]
+    assert not device.changes['method'][0]
+
+    assert await device.read_state('sleeping') == 'sleeping' * 2
+
+    assert device.changes['callback'][0] == 1
+    assert device.changes['method'][0] == 1
+
+    changes = await device.get_changes()
+    assert changes is device.changes
+
+    with pytest.raises(ValueError):
+        await device.read_state('sleeping', raise_exception=True)
+
+    assert device.changes['callback'][0] == 1
+    assert device.changes['method'][0] == 2
+
+
+async def test_execute_async(executor: ExecutorBase):
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    async with executor.remote_instance(device, 'some_device'):
+        await device.set_supports_coroutine(True)
+        assert not device.changes['callback'][0]
+        assert not device.changes['method_async'][0]
+
+        assert await device.read_state_async('sleeping') == 'sleeping' * 2
+
+        assert device.changes['callback'][0] == 1
+        assert device.changes['method_async'][0] == int(not executor.is_remote)
+
+        changes = await device.get_changes()
+        assert changes['callback'][0] == 1
+        assert changes['method_async'][0] == 1
+
+        with pytest.raises(
+                RemoteException if executor.is_remote else ValueError):
+            await device.read_state_async('sleeping', raise_exception=True)
+
+        assert device.changes['callback'][0] == 1
+        assert device.changes['method_async'][0] == 2 * int(not executor.is_remote)
+
+        changes = await device.get_changes()
+        assert changes['callback'][0] == 1
+        assert changes['method_async'][0] == 2
+
+        await device.set_supports_coroutine(False)
+
+
+async def test_execute_async_unsupported(executor: ExecutorBase):
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    async with executor.remote_instance(device, 'some_device'):
+        with pytest.raises(ValueError):
+            await device.read_state_async('sleeping')
+
+
+async def test_execute_async_no_executor():
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    assert not device.changes['callback'][0]
+    assert not device.changes['method_async'][0]
+
+    assert await device.read_state_async('sleeping') == 'sleeping' * 2
+
+    assert device.changes['callback'][0] == 1
+    assert device.changes['method_async'][0] == 1
+
+    changes = await device.get_changes()
+    assert changes is device.changes
+
+    with pytest.raises(ValueError):
+        await device.read_state_async('sleeping', raise_exception=True)
+
+    assert device.changes['callback'][0] == 1
+    assert device.changes['method_async'][0] == 2
+
+
 async def test_execute_generate(executor: ExecutorBase):
     from pymoa_remote.tests.device import RandomDigitalChannel
 
@@ -143,6 +228,53 @@ async def test_execute_generate(executor: ExecutorBase):
         changes = await device.get_changes()
         assert changes['callback'][0] == n + 5
         assert changes['method_gen'][0] == n + 6
+
+
+async def test_execute_generate_async_unsupported(executor: ExecutorBase):
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    values = list(range(5)) + ['hello'] + list(range(5))
+
+    async with executor.remote_instance(device, 'some_device'):
+        with pytest.raises(ValueError):
+            async with device.generate_data_async(values) as aiter:
+                async for value in aiter:
+                    pass
+
+
+async def test_execute_generate_async_no_executor():
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    device = RandomDigitalChannel()
+    values = list(range(5)) + ['hello'] + list(range(5))
+    n = len(values)
+
+    assert not device.changes['callback'][0]
+    assert not device.changes['method_gen_async'][0]
+
+    async with device.generate_data_async(values) as aiter:
+        new_values = []
+        async for value in aiter:
+            new_values.append(value)
+    assert new_values == [v * 2 for v in values]
+
+    assert device.changes['callback'][0] == n
+    assert device.changes['method_gen_async'][0] == n
+
+    changes = await device.get_changes()
+    assert changes is device.changes
+
+    values[5] = 'exception'
+    with pytest.raises(ValueError):
+        async with device.generate_data_async(values) as aiter:
+            new_values = []
+            async for value in aiter:
+                new_values.append(value)
+    assert new_values == [v * 2 for v in values][:5]
+
+    assert device.changes['callback'][0] == n + 5
+    assert device.changes['method_gen_async'][0] == (n + 6)
 
 
 async def test_execute_generate_break(executor: ExecutorBase):
