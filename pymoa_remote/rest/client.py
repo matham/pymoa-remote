@@ -13,7 +13,7 @@ from async_generator import aclosing
 import contextlib
 from tree_config import apply_config
 
-from pymoa_remote.rest import SSEStream
+from pymoa_remote.rest.sse import SSEStream
 from pymoa_remote.client import Executor
 from pymoa_remote.executor import NO_CALLBACK
 from pymoa_remote.exception import raise_remote_exception_from_frames
