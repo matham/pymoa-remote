@@ -129,7 +129,9 @@ async def test_execute_async(executor: ExecutorBase):
 
     device = RandomDigitalChannel()
     async with executor.remote_instance(device, 'some_device'):
+        ExecutorBase.supports_coroutine = True
         await device.set_supports_coroutine(True)
+
         assert not device.changes['callback'][0]
         assert not device.changes['method_async'][0]
 
@@ -147,13 +149,15 @@ async def test_execute_async(executor: ExecutorBase):
             await device.read_state_async('sleeping', raise_exception=True)
 
         assert device.changes['callback'][0] == 1
-        assert device.changes['method_async'][0] == 2 * int(not executor.is_remote)
+        assert device.changes['method_async'][0] == 2 * int(
+            not executor.is_remote)
 
         changes = await device.get_changes()
         assert changes['callback'][0] == 1
         assert changes['method_async'][0] == 2
 
         await device.set_supports_coroutine(False)
+        ExecutorBase.supports_coroutine = False
 
 
 async def test_execute_async_unsupported(executor: ExecutorBase):
@@ -420,7 +424,7 @@ async def test_stream_channel_create_delete(
 
     delete_msg = {
         ('data', ): {
-           'hash_name': '',
+            'hash_name': '',
         },
         'hash_name': '',
         'stream': 'delete'
