@@ -295,7 +295,6 @@ class SocketExecutor(Executor):
                 assert type(ret_data['data']) == bytes
                 ret_data['data'] = self.registry.decode_json_buffers_raw(
                     ret_data['data'])
-                print('yielding', ret_data)
                 yield ret_data
 
     @asynccontextmanager

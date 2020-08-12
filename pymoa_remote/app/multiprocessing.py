@@ -147,12 +147,13 @@ async def socket_data_stream_handler(
             await executor.write_socket(
                 executor.encode({'data': 'hello'}), stream)
 
-            msg_data = {'packet': 0, 'data': executor.encode(initial)}
+            msg_data = {
+                'packet': 0, 'data': {'data': executor.encode(initial)}}
             await executor.write_socket(executor.encode(msg_data), stream)
 
             packet = 1
             async for data_item in queue:
-                msg_data = {'packet': packet, 'data': data_item}
+                msg_data = {'packet': packet, 'data': {'data': data_item}}
                 packet += 1
 
                 await executor.write_socket(executor.encode(msg_data), stream)

@@ -176,14 +176,15 @@ class QuartRestServer(SimpleExecutorServer):
                     message = f"data: {data}\n\n"
                     yield message.encode('utf-8')
 
-                    data = self.encode({'data': self.encode(initial)})
+                    data = self.encode(
+                        {'data': {'data': self.encode(initial)}})
                     id_data = json.dumps((0, ))
                     message = f"data: {data}\nid: {id_data}\n\n"
                     yield message.encode('utf-8')
 
                     packet = 1
                     async for data_item in queue:
-                        data = self.encode({'data': data_item})
+                        data = self.encode({'data': {'data': data_item}})
                         id_data = json.dumps((packet, ))
                         message = f"data: {data}\nid: {id_data}\n\n"
                         yield message.encode('utf-8')
@@ -390,12 +391,13 @@ class QuartSocketServer(SimpleExecutorServer):
                 # write any response
                 await websocket.send(self.encode({'data': 'hello'}))
 
-                msg_data = {'packet': 0, 'data': self.encode(initial)}
+                msg_data = {
+                    'packet': 0, 'data': {'data': self.encode(initial)}}
                 await websocket.send(self.encode(msg_data))
 
                 packet = 1
                 async for data_item in queue:
-                    msg_data = {'packet': packet, 'data': data_item}
+                    msg_data = {'packet': packet, 'data': {'data': data_item}}
                     packet += 1
 
                     await websocket.send(self.encode(msg_data))
