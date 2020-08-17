@@ -102,12 +102,48 @@ class Executor(ExecutorBase):
 
     _uuid: bytes = None
 
-    def __init__(self, registry: 'LocalRegistry' = None, **kwargs):
+    __init_context = True
+
+    __context: Optional[ExecutorContext] = None
+
+    def __init__(
+            self, registry: 'LocalRegistry' = None, init_context=True,
+            **kwargs):
         super(Executor, self).__init__(**kwargs)
         if registry is None:
             registry = LocalRegistry()
         self.registry = registry
         self._uuid = uuid.uuid4().bytes
+        self.__init_context = init_context
+
+    async def __aenter__(self):
+        # todo: test init
+        if self.__init_context:
+            if self.__context is not None:
+                raise TypeError
+
+            context = ExecutorContext(executor=self)
+            context.__enter__()
+            try:
+                await self.start_executor()
+            except BaseException:
+                context.__exit__(None, None, None)
+                raise
+            self.__context = context
+            return self
+
+        await self.start_executor()
+        return self
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        try:
+            await self.stop_executor()
+        finally:
+            context = self.__context
+            self.__context = None
+
+            if context is not None:
+                context.__exit__(None, None, None)
 
     def encode(self, data: Any) -> str:
         """Encodes the data as required by the specific executor.

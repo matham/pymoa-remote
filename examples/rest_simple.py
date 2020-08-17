@@ -1,5 +1,4 @@
-from pymoa_remote import apply_executor, ExecutorContext, \
-    apply_generator_executor, RestExecutor
+from pymoa_remote import apply_executor, apply_generator_executor, RestExecutor
 from pymoa_remote.app.quart import create_app, start_app
 import trio
 from os import getpid
@@ -54,8 +53,7 @@ async def main_external_server(host, port):
     Then start this function with the appropriate host and port.
     """
     async with RestExecutor(uri=f'{host}:{port}') as executor:
-        with ExecutorContext(executor):
-            await do_demo(executor)
+        await do_demo(executor)
 
 
 async def main_internal_server():
@@ -67,8 +65,7 @@ async def main_internal_server():
             await nursery.start(start_app, app, '127.0.0.1', 5001)
 
             async with RestExecutor(uri='http://127.0.0.1:5001') as executor:
-                with ExecutorContext(executor):
-                    await do_demo(executor)
+                await do_demo(executor)
 
             nursery.cancel_scope.cancel()
 

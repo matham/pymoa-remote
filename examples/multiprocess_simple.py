@@ -1,5 +1,5 @@
 from pymoa_remote import MultiprocessSocketExecutor, apply_executor, \
-    ExecutorContext, apply_generator_executor
+    apply_generator_executor
 import trio
 from os import getpid
 
@@ -47,8 +47,7 @@ async def do_demo(executor: MultiprocessSocketExecutor):
 async def main():
     async with MultiprocessSocketExecutor(
             server='127.0.0.1', allow_import_from_main=True) as executor:
-        with ExecutorContext(executor):
-            await do_demo(executor)
+        await do_demo(executor)
 
 
 if __name__ == '__main__':

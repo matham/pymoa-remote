@@ -1,6 +1,7 @@
 import pytest
 from itertools import combinations, chain, product
 import trio
+from threading import get_ident
 from pymoa_remote.executor import ExecutorBase
 from pymoa_remote.exception import RemoteException
 from pymoa_remote.client import ExecutorContext
@@ -541,3 +542,35 @@ async def test_data_streaming(remote_executor: ExecutorBase, nursery):
         add_expected(hash_0, on_event=['uh greek'])
 
     assert log == expected
+
+
+async def test_executor_context_init():
+    from pymoa_remote.threading import ThreadExecutor
+    from pymoa_remote.tests.device import RandomDigitalChannel
+
+    tid = get_ident()
+    device = RandomDigitalChannel()
+
+    async with ThreadExecutor(init_context=False) as executor:
+        async with executor.remote_instance(device, 'some device'):
+            assert await device.get_thread_ident() == tid
+
+            with ExecutorContext(executor):
+                executor_tid = await device.get_thread_ident()
+                assert executor_tid != tid
+
+    async with ThreadExecutor() as executor:
+        async with executor.remote_instance(device, 'some device'):
+            executor_tid = await device.get_thread_ident()
+            assert executor_tid != tid
+
+            async with ThreadExecutor() as executor2:
+                async with executor2.remote_instance(device, 'some device'):
+                    executor_tid2 = await device.get_thread_ident()
+                    assert executor_tid != tid
+                    assert executor_tid2 != executor_tid
+                    assert executor_tid2 != tid
+
+                    with ExecutorContext(executor):
+                        executor_tid_ = await device.get_thread_ident()
+                        assert executor_tid_ == executor_tid

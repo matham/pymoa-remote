@@ -110,6 +110,10 @@ class RandomDigitalChannel:
         # monkey patch so we can test async, whatever part is supported
         ExecutorBase.supports_coroutine = value
 
+    @apply_executor
+    def get_thread_ident(self):
+        return get_ident()
+
 
 class BoundChannel:
 
