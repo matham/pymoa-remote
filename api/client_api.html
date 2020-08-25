@@ -1,0 +1,638 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Executor API &mdash; PyMoa-Remote  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Available Executors" href="executors.html" />
+    <link rel="prev" title="The PyMoa-Remote API" href="api.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> PyMoa-Remote
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">The PyMoa-Remote API</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Executor API</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#executor-interface">Executor Interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#executor-client-api">Executor Client API</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="executors.html">Available Executors</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pymoa_remote.html">PyMoa-Remote Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app/api.html">Remote Server Apps</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyMoa-Remote</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="api.html">The PyMoa-Remote API</a> &raquo;</li>
+        
+      <li>Executor API</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/api/client_api.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="module-pymoa_remote.executor">
+<span id="executor-api"></span><h1>Executor API<a class="headerlink" href="#module-pymoa_remote.executor" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="executor-interface">
+<h2>Executor Interface<a class="headerlink" href="#executor-interface" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pymoa_remote.executor.ExecutorBase">
+<em class="property">class </em><code class="sig-prename descclassname">pymoa_remote.executor.</code><code class="sig-name descname">ExecutorBase</code><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Executor that can be used to execute a method in a different context,
+e.g. in a different thread or across the network in a server.</p>
+<p>It is not safe to be called concurrently, except execute/execute_generator.</p>
+<p>TODO: test that all obj methods raise exception if called before ensure
+TODO: an error should be raised if using executor outside with block</p>
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.apply_config_from_remote">
+<em class="property">await </em><code class="sig-name descname">apply_config_from_remote</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.apply_config_from_remote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.apply_data_from_remote">
+<em class="property">await </em><code class="sig-name descname">apply_data_from_remote</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">trigger_names</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">triggered_logged_names</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">logged_names</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">initial_properties</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">task_status</span><span class="o">=</span><span class="default_value">TASK_STATUS_IGNORED</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.apply_data_from_remote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.apply_execute_from_remote">
+<em class="property">await </em><code class="sig-name descname">apply_execute_from_remote</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">exclude_self</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">task_status</span><span class="o">=</span><span class="default_value">TASK_STATUS_IGNORED</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.apply_execute_from_remote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.apply_property_data_from_remote">
+<em class="property">await </em><code class="sig-name descname">apply_property_data_from_remote</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="n">properties</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.apply_property_data_from_remote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.call_execute_callback">
+<em class="property">classmethod </em><code class="sig-name descname">call_execute_callback</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">return_value</span></em>, <em class="sig-param"><span class="n">callback</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.call_execute_callback" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.call_execute_callback_func">
+<em class="property">classmethod </em><code class="sig-name descname">call_execute_callback_func</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">return_value</span></em>, <em class="sig-param"><span class="n">callback</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.call_execute_callback_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.decode">
+<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.decode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.delete_remote_instance">
+<em class="property">await </em><code class="sig-name descname">delete_remote_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.delete_remote_instance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.encode">
+<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.encode" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.ensure_remote_instance">
+<em class="property">await </em><code class="sig-name descname">ensure_remote_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">hash_name</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">auto_register_class</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; bool<a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.ensure_remote_instance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.execute">
+<em class="property">await </em><code class="sig-name descname">execute</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">fn</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Callable<span class="p">, </span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">args</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">kwargs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">callback</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Callable<span class="p">, </span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.execute" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.execute_generator">
+<em class="property">await </em><code class="sig-name descname">execute_generator</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">gen</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Callable<span class="p">, </span>str<span class="p">]</span></span></em>, <em class="sig-param"><span class="n">args</span><span class="o">=</span><span class="default_value">()</span></em>, <em class="sig-param"><span class="n">kwargs</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">callback</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>Callable<span class="p">, </span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">task_status</span><span class="o">=</span><span class="default_value">TASK_STATUS_IGNORED</span></em><span class="sig-paren">)</span> &#x2192; AsyncGenerator<a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.execute_generator" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.get_channel_from_remote">
+<em class="property">await </em><code class="sig-name descname">get_channel_from_remote</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">channel</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">task_status</span><span class="o">=</span><span class="default_value">TASK_STATUS_IGNORED</span></em><span class="sig-paren">)</span> &#x2192; AbstractAsyncContextManager<span class="p">[</span>AsyncGenerator<span class="p">]</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.get_channel_from_remote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.get_data_from_remote">
+<em class="property">await </em><code class="sig-name descname">get_data_from_remote</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">trigger_names</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">triggered_logged_names</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">logged_names</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">initial_properties</span><span class="p">:</span> <span class="n">Iterable<span class="p">[</span>str<span class="p">]</span></span> <span class="o">=</span> <span class="default_value">()</span></em>, <em class="sig-param"><span class="n">task_status</span><span class="o">=</span><span class="default_value">TASK_STATUS_IGNORED</span></em><span class="sig-paren">)</span> &#x2192; AbstractAsyncContextManager<span class="p">[</span>AsyncGenerator<span class="p">]</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.get_data_from_remote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.get_echo_clock">
+<em class="property">await </em><code class="sig-name descname">get_echo_clock</code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>int<span class="p">, </span>int<span class="p">, </span>int<span class="p">]</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.get_echo_clock" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.get_execute_callback_func">
+<em class="property">classmethod </em><code class="sig-name descname">get_execute_callback_func</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">callback</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.get_execute_callback_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.get_remote_object_config">
+<em class="property">await </em><code class="sig-name descname">get_remote_object_config</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span>Any<span class="p">]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.get_remote_object_config" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.get_remote_object_property_data">
+<em class="property">await </em><code class="sig-name descname">get_remote_object_property_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span></em>, <em class="sig-param"><span class="n">properties</span><span class="p">:</span> <span class="n">List<span class="p">[</span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; dict<a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.get_remote_object_property_data" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.get_remote_objects">
+<em class="property">await </em><code class="sig-name descname">get_remote_objects</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.get_remote_objects" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.ExecutorBase.is_remote">
+<code class="sig-name descname">is_remote</code><em class="property"> = True</em><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.is_remote" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.ExecutorBase.name">
+<code class="sig-name descname">name</code><em class="property"> = 'Executor'</em><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.name" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.register_remote_class">
+<em class="property">await </em><code class="sig-name descname">register_remote_class</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">cls</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.register_remote_class" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.remote_import">
+<em class="property">await </em><code class="sig-name descname">remote_import</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">module</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.remote_import" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.remote_instance">
+<em class="property">async with </em><code class="sig-name descname">remote_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">hash_name</span></em>, <em class="sig-param"><span class="o">*</span><span class="n">args</span></em>, <em class="sig-param"><span class="n">auto_register_class</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span> &#x2192; AbstractAsyncContextManager<span class="p">[</span>Any<span class="p">]</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.remote_instance" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.sleep">
+<em class="property">await </em><code class="sig-name descname">sleep</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">duration</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">deadline</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span> &#x2192; int<a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.sleep" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.start_executor">
+<em class="property">await </em><code class="sig-name descname">start_executor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.start_executor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.ExecutorBase.stop_executor">
+<em class="property">await </em><code class="sig-name descname">stop_executor</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.stop_executor" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.ExecutorBase.supports_coroutine">
+<code class="sig-name descname">supports_coroutine</code><em class="property"> = False</em><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.supports_coroutine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.ExecutorBase.supports_non_coroutine">
+<code class="sig-name descname">supports_non_coroutine</code><em class="property"> = True</em><a class="headerlink" href="#pymoa_remote.executor.ExecutorBase.supports_non_coroutine" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymoa_remote.executor.InstanceRegistry">
+<em class="property">class </em><code class="sig-prename descclassname">pymoa_remote.executor.</code><code class="sig-name descname">InstanceRegistry</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Registry that contains objects know by the register that can be
+referenced.</p>
+<p>It registers classes for instantiation and uses a base64 name hash for
+identifying them. It registers coders for serializing them.</p>
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.convert_base64_to_hash">
+<code class="sig-name descname">convert_base64_to_hash</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">encoded_hash</span><span class="p">:</span> <span class="n">Union<span class="p">[</span>bytes<span class="p">, </span>str<span class="p">]</span></span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.convert_base64_to_hash" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.convert_hash_to_base64">
+<code class="sig-name descname">convert_hash_to_base64</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">hash_val</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.convert_hash_to_base64" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.decode_json">
+<code class="sig-name descname">decode_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.decode_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.decode_json_buffers">
+<code class="sig-name descname">decode_json_buffers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">bytes</span></em>, <em class="sig-param"><span class="n">json_bytes</span><span class="p">:</span> <span class="n">int</span></em>, <em class="sig-param"><span class="n">num_buffers</span><span class="p">:</span> <span class="n">int</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.decode_json_buffers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.decode_json_buffers_header">
+<code class="sig-name descname">decode_json_buffers_header</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">header</span><span class="p">:</span> <span class="n">bytes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.decode_json_buffers_header" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.decode_json_buffers_raw">
+<code class="sig-name descname">decode_json_buffers_raw</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">bytes</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.decode_json_buffers_raw" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.encode_json">
+<code class="sig-name descname">encode_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.encode_json" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.encode_json_buffers">
+<code class="sig-name descname">encode_json_buffers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span> &#x2192; bytes<a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.encode_json_buffers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Message is: magic number, size of dynamic message, size of json,
+number of buffers, json, list of size for each buffer, buffers.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.encode_json_func">
+<code class="sig-name descname">encode_json_func</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">buffers</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.encode_json_func" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.InstanceRegistry.hashed_instances">
+<code class="sig-name descname">hashed_instances</code><em class="property">: Dict<span class="p">[</span>str<span class="p">, </span>Any<span class="p">]</span></em><em class="property"> = {}</em><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.hashed_instances" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.InstanceRegistry.hashed_instances_ids">
+<code class="sig-name descname">hashed_instances_ids</code><em class="property">: Dict<span class="p">[</span>int<span class="p">, </span>str<span class="p">]</span></em><em class="property"> = {}</em><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.hashed_instances_ids" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.is_class_registered">
+<code class="sig-name descname">is_class_registered</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">class_to_register</span><span class="p">:</span> <span class="n">type</span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">class_triple</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.is_class_registered" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.InstanceRegistry.json_coders">
+<code class="sig-name descname">json_coders</code><em class="property">: Dict<span class="p">[</span>str<span class="p">, </span>Tuple<span class="p">[</span>type<span class="p">, </span>Callable<span class="p">, </span>Callable<span class="p">]</span><span class="p">]</span></em><em class="property"> = {}</em><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.json_coders" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.prepare_json_buffers">
+<code class="sig-name descname">prepare_json_buffers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span> &#x2192; Tuple<span class="p">[</span>bytes<span class="p">, </span>List<span class="p">[</span>bytes<span class="p">]</span><span class="p">]</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.prepare_json_buffers" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.executor.InstanceRegistry.referenceable_classes">
+<code class="sig-name descname">referenceable_classes</code><em class="property">: Dict<span class="p">[</span>Tuple<span class="p">[</span>str<span class="p">, </span>str<span class="p">, </span>str<span class="p">]</span><span class="p">, </span>Callable<span class="p">]</span></em><em class="property"> = {}</em><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.referenceable_classes" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.referenceable_json_decoder">
+<code class="sig-name descname">referenceable_json_decoder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dct</span><span class="p">:</span> <span class="n">dict</span></em>, <em class="sig-param"><span class="n">buffers</span><span class="p">:</span> <span class="n">list</span> <span class="o">=</span> <span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.referenceable_json_decoder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.register_class">
+<code class="sig-name descname">register_class</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">class_to_register</span><span class="p">:</span> <span class="n">type</span></em>, <em class="sig-param"><span class="n">triple</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.register_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Duplicated register raises error.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.executor.InstanceRegistry.register_json_coder">
+<code class="sig-name descname">register_json_coder</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">name</span><span class="p">:</span> <span class="n">str</span></em>, <em class="sig-param"><span class="n">class_to_register</span><span class="p">:</span> <span class="n">type</span></em>, <em class="sig-param"><span class="n">encoder</span><span class="p">:</span> <span class="n">Callable</span></em>, <em class="sig-param"><span class="n">decoder</span><span class="p">:</span> <span class="n">Callable</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.executor.InstanceRegistry.register_json_coder" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py data">
+<dt id="pymoa_remote.executor.NO_CALLBACK">
+<code class="sig-prename descclassname">pymoa_remote.executor.</code><code class="sig-name descname">NO_CALLBACK</code><em class="property"> = '#&#64;none'</em><a class="headerlink" href="#pymoa_remote.executor.NO_CALLBACK" title="Permalink to this definition">¶</a></dt>
+<dd><p>Can be used with <code class="xref py py-func docutils literal notranslate"><span class="pre">apply_executor()</span></code> to indicate that no callback should
+be used.</p>
+</dd></dl>
+
+</div>
+<span class="target" id="module-pymoa_remote.client"></span><div class="section" id="executor-client-api">
+<h2>Executor Client API<a class="headerlink" href="#executor-client-api" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt id="pymoa_remote.client.Executor">
+<em class="property">class </em><code class="sig-prename descclassname">pymoa_remote.client.</code><code class="sig-name descname">Executor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">registry</span><span class="p">:</span> <span class="n">Optional<span class="p">[</span><a class="reference internal" href="#pymoa_remote.client.LocalRegistry" title="pymoa_remote.client.LocalRegistry">pymoa_remote.client.LocalRegistry</a><span class="p">]</span></span> <span class="o">=</span> <span class="default_value">None</span></em>, <em class="sig-param"><span class="n">init_context</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.client.Executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymoa_remote.executor.ExecutorBase" title="pymoa_remote.executor.ExecutorBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymoa_remote.executor.ExecutorBase</span></code></a></p>
+<p>Executor base class used by all the clients.</p>
+<p>Adds internal API used by the clients to help it have a uniform public API.</p>
+<dl class="py method">
+<dt id="pymoa_remote.client.Executor.decode">
+<code class="sig-name descname">decode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">str</span></em><span class="sig-paren">)</span> &#x2192; Any<a class="headerlink" href="#pymoa_remote.client.Executor.decode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decodes the data encoded with <a class="reference internal" href="#pymoa_remote.client.Executor.encode" title="pymoa_remote.client.Executor.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.client.Executor.encode">
+<code class="sig-name descname">encode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">data</span><span class="p">:</span> <span class="n">Any</span></em><span class="sig-paren">)</span> &#x2192; str<a class="headerlink" href="#pymoa_remote.client.Executor.encode" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encodes the data as required by the specific executor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.client.Executor.registry">
+<code class="sig-name descname">registry</code><em class="property">: <a class="reference internal" href="#pymoa_remote.client.LocalRegistry" title="pymoa_remote.client.LocalRegistry">pymoa_remote.client.LocalRegistry</a></em><em class="property"> = None</em><a class="headerlink" href="#pymoa_remote.client.Executor.registry" title="Permalink to this definition">¶</a></dt>
+<dd><p>The registry that tracks registered objects and classes.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymoa_remote.client.ExecutorContext">
+<em class="property">class </em><code class="sig-prename descclassname">pymoa_remote.client.</code><code class="sig-name descname">ExecutorContext</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">executor</span><span class="p">:</span> <span class="n"><a class="reference internal" href="#pymoa_remote.client.Executor" title="pymoa_remote.client.Executor">pymoa_remote.client.Executor</a></span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.client.ExecutorContext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Context manager that sets the executor to be used when a executor
+decorated method is called. E.g. given:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Demo</span><span class="p">:</span>
+
+    <span class="nd">@apply_executor</span>
+    <span class="k">def</span> <span class="nf">sum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span>
+</pre></div>
+</div>
+<p>When calling <code class="docutils literal notranslate"><span class="pre">result</span> <span class="pre">=</span> <span class="pre">await</span> <span class="pre">demo.sum(1,</span> <span class="pre">2)</span></code>, since no executor is
+set, the method will be executed locally. <a class="reference internal" href="#pymoa_remote.client.ExecutorContext" title="pymoa_remote.client.ExecutorContext"><code class="xref py py-class docutils literal notranslate"><span class="pre">ExecutorContext</span></code></a> sets the
+current executor e.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ExecutorContext</span><span class="p">(</span><span class="n">executor</span><span class="p">):</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="k">await</span> <span class="n">demo</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will use the <code class="docutils literal notranslate"><span class="pre">executor</span></code> to execute <code class="docutils literal notranslate"><span class="pre">sum</span></code> remotely with that executor.
+Multiple executors can be used as needed e.g.:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">ExecutorContext</span><span class="p">(</span><span class="n">executor_1</span><span class="p">):</span>
+    <span class="n">result1</span> <span class="o">=</span> <span class="k">await</span> <span class="n">demo</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="k">with</span> <span class="n">ExecutorContext</span><span class="p">(</span><span class="n">executor_2</span><span class="p">):</span>
+        <span class="n">result2</span> <span class="o">=</span> <span class="k">await</span> <span class="n">demo</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+
+    <span class="n">result3</span> <span class="o">=</span> <span class="k">await</span> <span class="n">demo</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>will use <code class="docutils literal notranslate"><span class="pre">executor_1</span></code> to compute <code class="docutils literal notranslate"><span class="pre">result1</span></code> and <code class="docutils literal notranslate"><span class="pre">result3</span></code> and
+<code class="docutils literal notranslate"><span class="pre">executor_2</span></code> for <code class="docutils literal notranslate"><span class="pre">result2</span></code>.</p>
+<dl class="py attribute">
+<dt id="pymoa_remote.client.ExecutorContext.executor">
+<code class="sig-name descname">executor</code><em class="property">: <a class="reference internal" href="#pymoa_remote.client.Executor" title="pymoa_remote.client.Executor">pymoa_remote.client.Executor</a></em><a class="headerlink" href="#pymoa_remote.client.ExecutorContext.executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>The context’s executor.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt id="pymoa_remote.client.ExecutorContext.token">
+<code class="sig-name descname">token</code><em class="property"> = None</em><a class="headerlink" href="#pymoa_remote.client.ExecutorContext.token" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymoa_remote.client.LocalRegistry">
+<em class="property">class </em><code class="sig-prename descclassname">pymoa_remote.client.</code><code class="sig-name descname">LocalRegistry</code><span class="sig-paren">(</span><em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.client.LocalRegistry" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymoa_remote.executor.InstanceRegistry" title="pymoa_remote.executor.InstanceRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">pymoa_remote.executor.InstanceRegistry</span></code></a></p>
+<p>Client side object registry.</p>
+<dl class="py method">
+<dt id="pymoa_remote.client.LocalRegistry.add_instance">
+<code class="sig-name descname">add_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em>, <em class="sig-param"><span class="n">hash_name</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.client.LocalRegistry.add_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registers the object using the given name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>obj</strong> – The object to register</p></li>
+<li><p><strong>hash_name</strong> – The name to use to identify this object by the
+executor and its remote server (if applicable).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The object.</p>
+</dd>
+<dt class="field-odd">Raises</dt>
+<dd class="field-odd"><p>ValueError if the name is already registered.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymoa_remote.client.LocalRegistry.delete_instance">
+<code class="sig-name descname">delete_instance</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">obj</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.client.LocalRegistry.delete_instance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the previously registered object.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>obj</strong> – The object previously registered with <a class="reference internal" href="#pymoa_remote.client.LocalRegistry.add_instance" title="pymoa_remote.client.LocalRegistry.add_instance"><code class="xref py py-meth docutils literal notranslate"><span class="pre">add_instance()</span></code></a>.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The object.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt id="pymoa_remote.client.apply_executor">
+<code class="sig-prename descclassname">pymoa_remote.client.</code><code class="sig-name descname">apply_executor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">callback</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.client.apply_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator that will cause the method to be executed remotely using
+the currently active executor and return its value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>func</strong> – The method to be decorated.</p></li>
+<li><p><strong>callback</strong> – The optional callback that will be executed with the
+method result. This can be specified as a string or method, but it must
+be a method of the same class.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The decorated method.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pymoa_remote.client.apply_generator_executor">
+<code class="sig-prename descclassname">pymoa_remote.client.</code><code class="sig-name descname">apply_generator_executor</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">func</span><span class="o">=</span><span class="default_value">None</span></em>, <em class="sig-param"><span class="n">callback</span><span class="o">=</span><span class="default_value">None</span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.client.apply_generator_executor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Decorator that calls the generator method using the executor.</p>
+</dd></dl>
+
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="executors.html" class="btn btn-neutral float-right" title="Available Executors" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="api.html" class="btn btn-neutral float-left" title="The PyMoa-Remote API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2020, Matthew Einhorn
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
