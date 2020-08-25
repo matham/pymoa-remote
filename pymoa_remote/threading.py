@@ -408,6 +408,16 @@ class SyncThreadExecutor:
         t = await self.execute(None, get_time, callback=NO_CALLBACK)
         return ts, t, time.perf_counter_ns()
 
+    async def sleep(self, duration=None, deadline=None) -> int:
+        if duration is not None:
+            await trio.sleep(duration)
+        elif deadline is not None:
+            await trio.sleep(max(0, deadline - time.perf_counter_ns()) / 1e9)
+        else:
+            raise ValueError('Either deadline or duration must be a number')
+
+        return time.perf_counter_ns()
+
 
 class AsyncThreadExecutor:
     """Executor that executes async functions in a trio event loop in a

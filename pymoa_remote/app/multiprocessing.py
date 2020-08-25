@@ -116,6 +116,8 @@ async def socket_handler(executor: ProcessSocketServer, stream: SocketStream):
                 res = await executor.get_object_data(data)
             elif cmd == 'get_echo_clock':
                 res = await executor.get_echo_clock(data)
+            elif cmd == 'sleep':
+                res = await executor.sleep(data)
             else:
                 raise Exception(f'Unknown command "{cmd}"')
 

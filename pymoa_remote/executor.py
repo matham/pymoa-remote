@@ -88,6 +88,9 @@ class ExecutorBase:
     async def get_echo_clock(self) -> Tuple[int, int, int]:
         raise NotImplementedError
 
+    async def sleep(self, duration=None, deadline=None) -> int:
+        raise NotImplementedError
+
     async def __aenter__(self):
         await self.start_executor()
         return self

@@ -153,6 +153,10 @@ class QuartRestServer(SimpleExecutorServer):
     async def get_echo_clock(self, data: dict):
         return await super().get_echo_clock(data)
 
+    @convert_io
+    async def sleep(self, data: dict):
+        return await super().sleep(data)
+
     async def sse_data(self):
         # todo: send alive with timeout in case skipped packets
         # todo: make sure in all the apps decoding will raise user
@@ -378,6 +382,8 @@ class QuartSocketServer(SimpleExecutorServer):
                     res = await self.get_object_data(data)
                 elif cmd == 'get_echo_clock':
                     res = await self.get_echo_clock(data)
+                elif cmd == 'sleep':
+                    res = await self.sleep(data)
                 else:
                     raise Exception(f'Unknown command "{cmd}"')
 
@@ -548,6 +554,9 @@ def create_app(
         methods=['GET'])
     app.add_url_rule(
         '/api/v1/echo_clock', view_func=rest_executor.get_echo_clock,
+        methods=['GET'])
+    app.add_url_rule(
+        '/api/v1/sleep', view_func=rest_executor.sleep,
         methods=['GET'])
 
     app.add_url_rule(

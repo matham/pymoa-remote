@@ -1,4 +1,5 @@
 import pytest
+from time import perf_counter_ns
 from itertools import combinations, chain, product
 import trio
 from threading import get_ident
@@ -349,6 +350,23 @@ async def test_properties(executor: ExecutorBase):
 async def test_clock(executor: ExecutorBase):
     t1, t2, t3 = await executor.get_echo_clock()
     assert t3 >= t1
+
+
+async def test_sleep_duration(executor: ExecutorBase):
+    _, ts, _ = await executor.get_echo_clock()
+    t = await executor.sleep(duration=.2)
+    assert t - ts > 100_000_000
+
+
+async def test_sleep_deadline(executor: ExecutorBase):
+    _, ts, _ = await executor.get_echo_clock()
+    t = await executor.sleep(deadline=ts + 200_000_000)
+    assert t - ts > 100_000_000
+
+
+async def test_sleep_no_arg(executor: ExecutorBase):
+    with pytest.raises(RemoteException if executor.is_remote else ValueError):
+        await executor.sleep()
 
 
 async def test_register_class(executor: ExecutorBase):

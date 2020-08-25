@@ -354,3 +354,9 @@ class SocketExecutor(Executor):
             'get_echo_clock', self._get_clock_data())
 
         return start_time, res['data']['server_time'], time.perf_counter_ns()
+
+    async def sleep(self, duration=None, deadline=None) -> int:
+        res = await self._vanilla_write_read(
+            'sleep', self._get_sleep_data(duration, deadline))
+
+        return res['data']['server_time']

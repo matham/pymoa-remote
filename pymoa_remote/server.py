@@ -6,6 +6,7 @@ from typing import Dict, List, Any, Callable, Tuple, Set, AsyncGenerator, \
     Iterable, Optional
 from async_generator import aclosing
 import importlib
+import trio
 import importlib.util
 import time
 from itertools import chain
@@ -70,6 +71,9 @@ class ExecutorServerBase:
         raise NotImplementedError
 
     async def get_echo_clock(self, *args, **kwargs):
+        raise NotImplementedError
+
+    async def sleep(self, *args, **kwargs) -> int:
         raise NotImplementedError
 
     def post_stream_channel(self, data, channel, hash_name):
@@ -281,6 +285,19 @@ class ExecutorServer(ExecutorServerBase):
     def _get_clock_data(self, data: dict) -> dict:
         return {'server_time': time.perf_counter_ns()}
 
+    async def _sleep(self, data: dict) -> dict:
+        duration = data['duration']
+        deadline = data['deadline']
+
+        if duration is not None:
+            await trio.sleep(duration)
+        elif deadline is not None:
+            await trio.sleep(max(0, deadline - time.perf_counter_ns()) / 1e9)
+        else:
+            raise ValueError('Either deadline or duration must be a number')
+
+        return {'server_time': time.perf_counter_ns()}
+
 
 class SimpleExecutorServer(ExecutorServer):
 
@@ -330,6 +347,9 @@ class SimpleExecutorServer(ExecutorServer):
 
     async def get_echo_clock(self, data: dict):
         return self._get_clock_data(data)
+
+    async def sleep(self, data: dict):
+        return await self._sleep(data)
 
 
 class DataLogger:

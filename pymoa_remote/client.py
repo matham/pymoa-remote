@@ -324,6 +324,9 @@ class Executor(ExecutorBase):
     def _get_clock_data(self) -> dict:
         return {}
 
+    def _get_sleep_data(self, duration, deadline) -> dict:
+        return {'duration': duration, 'deadline': deadline}
+
 
 class LocalRegistry(InstanceRegistry):
     """Client side object registry.
