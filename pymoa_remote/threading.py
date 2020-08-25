@@ -32,6 +32,8 @@ __all__ = (
 
 class ThreadExecutor(Executor):
 
+    # todo: check that methods cannot be canceled in a weird state
+
     is_remote = False
 
     _obj_executor: Dict[
@@ -145,6 +147,7 @@ class ThreadExecutor(Executor):
     async def ensure_remote_instance(
             self, obj, hash_name, *args, auto_register_class=True, **kwargs
     ) -> bool:
+        # todo: except parameter whether it uses a lock for execute
         if id(obj) in self._obj_executor:
             return False
 
@@ -308,9 +311,11 @@ class SyncThreadExecutor:
                             continue
 
                         gen = result.unwrap()  # get the actual gen
+                        caught_error = False
                         while gen_do_eof[0] is not eof:
                             result = outcome.capture(next, gen)
                             if isinstance(result, outcome.Error):
+                                caught_error = True
                                 # stop iteration is signaled with None
                                 if isinstance(result.error, StopIteration):
                                     result = None
@@ -318,6 +323,16 @@ class SyncThreadExecutor:
                                 put(result, block=True)
                                 token.run_sync_soon(send_nowait)
                                 break
+
+                            put(result, block=True)
+                            token.run_sync_soon(send_nowait)
+
+                        # we exited because of eof not exception/StopIteration
+                        # send either None, or closing error
+                        if not caught_error:
+                            result = outcome.capture(gen.close)
+                            if not isinstance(result, outcome.Error):
+                                result = None
 
                             put(result, block=True)
                             token.run_sync_soon(send_nowait)
@@ -373,6 +388,7 @@ class SyncThreadExecutor:
                 (obj, sync_gen, args, kwargs or {}, None, token,
                  (send_channel, queue), do_eof))
 
+            result = None
             try:
                 # wait until signalled
                 async for _ in receive_channel:
@@ -388,20 +404,36 @@ class SyncThreadExecutor:
                         if result is None:
                             return
 
-                        result = result.unwrap()
+                        ret = result.unwrap()
 
-                        call_callback(result, callback)
-                        yield result
+                        call_callback(ret, callback)
+                        yield ret
             finally:
                 # if we are canceled, notify thread
                 do_eof[0] = self.eof
-                # get all the items so that eof is read in case thread is
-                # blocking on full queue
-                while True:
-                    try:
-                        queue.get(block=False)
-                    except Empty:
-                        break
+
+                if result is not None and not isinstance(
+                        result, outcome.Error):
+                    # we need to wait for last result in case closing returned
+                    # an error
+                    done = False
+                    with trio.CancelScope(shield=True):
+                        async for _ in receive_channel:
+                            while True:
+                                try:
+                                    result = queue.get(block=False)
+                                except Empty:
+                                    break
+
+                                # None means generator is done
+                                if result is None:
+                                    done = True
+                                    break
+                                # if not None, unwrap to raise any exception
+                                result.unwrap()
+
+                            if done:
+                                break
 
     async def get_echo_clock(self) -> Tuple[int, int, int]:
         def get_time(*args):

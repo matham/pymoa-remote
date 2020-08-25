@@ -76,6 +76,7 @@ async def test_config(executor: ExecutorBase):
 
 
 async def test_execute(executor: ExecutorBase):
+    # todo: test cancel and for all executor methods
     from pymoa_remote.tests.device import RandomDigitalChannel
 
     device = RandomDigitalChannel()
