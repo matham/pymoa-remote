@@ -393,6 +393,11 @@ class QuartSocketServer(SimpleExecutorServer):
                 # todo: ignore write_socket in generator
                 ret_data = {'exception': serialize_exception(e)}
                 encoded_ret = self.encode(ret_data)
+            # todo: should we be catching base exception and notify and
+            #  re-raise? Otherwise client may be waiting forever in a
+            #  shielded state
+
+            # todo: exception response when remote closed socket or for REST
 
             await websocket.send(encoded_ret)
 

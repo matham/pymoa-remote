@@ -32,6 +32,9 @@ class SocketExecutor(Executor):
     :meth:`open_socket`. Data is written with :meth:`write_socket` and
     encoded with :meth:`encode`. It is read and decoded with
     :meth:`read_decode_json_buffers`. All client requests use this basic API.
+
+    Normal methods cannot be canceled because there's no mechanism. Data
+    streams and the generator can be canceled since they have their own socket
     """
 
     server: str = ''
@@ -135,9 +138,11 @@ class SocketExecutor(Executor):
         }
         data = self.encode(data)
 
-        await self.write_socket(data, self.socket)
-        res = await self.read_decode_json_buffers(self.socket)
-        self.raise_return_value(res, packet)
+        # there's no mechanism currently to cancel and also cancel on remote
+        with trio.CancelScope(shield=True):
+            await self.write_socket(data, self.socket)
+            res = await self.read_decode_json_buffers(self.socket)
+            self.raise_return_value(res, packet)
 
         return res
 
