@@ -124,7 +124,10 @@ class ThreadExecutor(Executor):
     async def get_echo_clock(self) -> Tuple[int, int, int]:
         return await self._sync_executor.get_echo_clock()
 
-    async def get_async_echo_clock(self) -> Tuple[int, int, int]:
+    async def sleep(self, duration=None, deadline=None) -> int:
+        return await self._sync_executor.sleep(duration, deadline)
+
+    async def _get_async_echo_clock(self) -> Tuple[int, int, int]:
         return await self._async_executor.get_echo_clock()
 
     async def remote_import(self, module):

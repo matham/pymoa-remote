@@ -73,10 +73,10 @@ async def measure_executor_async(executor, name):
     cls = executor.__class__
     device = RandomAnalogChannel()
 
-    if hasattr(executor, 'get_async_echo_clock'):
+    if hasattr(executor, '_get_async_echo_clock'):
         responses = []
         for _ in range(100):
-            ts, t, te = await executor.get_async_echo_clock()
+            ts, t, te = await executor._get_async_echo_clock()
             responses.append((te - ts) / 1e6)
         response = sum(responses) / len(responses)
     else:
