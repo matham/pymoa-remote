@@ -6,7 +6,7 @@
 # todo: immediately close connection for sse/stream if full
 from quart_trio import QuartTrio
 from quart import make_response, request, jsonify, websocket
-from quart_trio.response import TrioIterableBody
+from quart_trio.wrappers.response import TrioIterableBody
 from functools import wraps
 from collections import defaultdict
 from async_generator import aclosing
