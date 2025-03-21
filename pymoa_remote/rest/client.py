@@ -4,13 +4,11 @@
 """
 from typing import AsyncGenerator, Tuple, Optional, Union, Callable, Any, \
     List, Iterable, AsyncContextManager
-from asks import Session
-from asks.errors import BadStatus
+from httpx import AsyncClient, Limits, Response
 import time
 from trio import TASK_STATUS_IGNORED
 import trio
 from async_generator import aclosing
-import contextlib
 from tree_config import apply_config
 
 from pymoa_remote.rest.sse import SSEStream
@@ -22,34 +20,12 @@ from pymoa_remote.utils import asynccontextmanager
 __all__ = ('RestExecutor', )
 
 
-def raise_for_status(response):
-    """
-    Raise BadStatus if one occurred.
-    """
-    if 400 <= response.status_code < 500:
-        raise BadStatus(
-            '{} Client Error: {} for url: {}'.format(
-                response.status_code, response.reason_phrase, response.url
-            ),
-            response,
-            response.status_code
-        )
-    elif 500 <= response.status_code < 600:
-        raise BadStatus(
-            '{} Server Error: {} for url: {}'.format(
-                response.status_code, response.reason_phrase, response.url
-            ),
-            response,
-            response.status_code
-        )
-
-
 class RestExecutor(Executor):
     """Executor that sends all requests to a remote server to be executed
     there, using a rest API.
     """
 
-    _session: Optional[Session] = None
+    _httpx_client: Optional[AsyncClient] = None
 
     uri: str = ''
 
@@ -66,9 +42,10 @@ class RestExecutor(Executor):
         data = self.encode(data)
 
         uri = f'{self.uri}/api/v1/{path_suffix}'
-        meth = getattr(self._session, method)
-        response = await meth(
-            uri, data=data, headers={'Content-Type': 'application/json'})
+        response = await self._httpx_client.request(
+            method, uri, content=data,
+            headers={'Content-Type': 'application/json'}
+        )
         response.raise_for_status()
 
         res = self.decode(response.text)
@@ -126,11 +103,11 @@ class RestExecutor(Executor):
 
     async def start_executor(self):
         self._limiter = trio.Lock()
-        self._session = Session(connections=1)
+        self._httpx_client = AsyncClient()
 
     async def stop_executor(self):
         self._limiter = None
-        self._session = None
+        self._httpx_client = None
 
     async def execute(
             self, obj, fn: Union[Callable, str], args=(), kwargs=None,
@@ -160,16 +137,18 @@ class RestExecutor(Executor):
         call_callback = self.call_execute_callback_func
 
         async with self._limiter:
-            response = await self._session.post(
-                uri, data=data, headers={'Content-Type': 'application/json'},
-                stream=True)
-            raise_for_status(response)
+            async with self._httpx_client.stream(
+                "POST", uri, content=data,
+                headers={'Content-Type': 'application/json'},
+            ) as response:
+                response.raise_for_status()
 
-            async with response.body() as response_body:
                 # todo: move this and everywhere else it's used to after we
                 #  bound or the generator started
                 task_status.started()
-                async for _, data, id_, _ in SSEStream.stream(response_body):
+                async for _, data, id_, _ in SSEStream.stream(
+                        response.aiter_bytes()
+                ):
                     data = decode(data)
                     if data == 'alive':
                         continue
@@ -221,29 +200,28 @@ class RestExecutor(Executor):
         for key, value in props.items():
             setattr(obj, key, value)
 
-    async def _generate_sse_events(self, response, task_status):
+    async def _generate_sse_events(self, response: Response, task_status):
         decode = self.decode
         last_packet = None
-        async with response.body() as response_body:
-            task_status.started()
-            async for _, data, id_, _ in SSEStream.stream(response_body):
-                res = decode(data)
-                if res == 'alive':
-                    continue
+        task_status.started()
+        async for _, data, id_, _ in SSEStream.stream(response.aiter_bytes()):
+            res = decode(data)
+            if res == 'alive':
+                continue
 
-                exception = res.get('exception', None)
-                if exception is not None:
-                    raise_remote_exception_from_frames(**exception)
+            exception = res.get('exception', None)
+            if exception is not None:
+                raise_remote_exception_from_frames(**exception)
 
-                packet, *_ = decode(id_)
-                if last_packet is not None and last_packet + 1 != packet:
-                    raise ValueError(
-                        f'Packets were skipped {last_packet} -> {packet}')
-                last_packet = packet
+            packet, *_ = decode(id_)
+            if last_packet is not None and last_packet + 1 != packet:
+                raise ValueError(
+                    f'Packets were skipped {last_packet} -> {packet}')
+            last_packet = packet
 
-                ret_data = res['data']
-                ret_data['data'] = self.decode(ret_data['data'])
-                yield ret_data
+            ret_data = res['data']
+            ret_data['data'] = self.decode(ret_data['data'])
+            yield ret_data
 
     @asynccontextmanager
     async def get_data_from_remote(
@@ -259,14 +237,15 @@ class RestExecutor(Executor):
         data = self.encode(data)
 
         uri = f'{self.uri}/api/v1/stream/data'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'},
-            stream=True)
-        raise_for_status(response)
+        async with self._httpx_client.stream(
+            "GET", uri, content=data,
+            headers={'Content-Type': 'application/json'}
+        ) as response:
+            response.raise_for_status()
 
-        async with aclosing(
-                self._generate_sse_events(response, task_status)) as aiter:
-            yield aiter
+            async with aclosing(
+                    self._generate_sse_events(response, task_status)) as aiter:
+                yield aiter
 
     async def apply_data_from_remote(
             self, obj, trigger_names: Iterable[str] = (),
@@ -280,13 +259,14 @@ class RestExecutor(Executor):
         data = self.encode(data)
 
         uri = f'{self.uri}/api/v1/stream/data'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'},
-            stream=True)
-        raise_for_status(response)
+        async with self._httpx_client.stream(
+            "GET", uri, content=data,
+            headers={'Content-Type': 'application/json'}
+        ) as response:
+            response.raise_for_status()
 
-        await self._apply_data_from_remote(
-            obj, self._generate_sse_events(response, task_status))
+            await self._apply_data_from_remote(
+                obj, self._generate_sse_events(response, task_status))
 
     @asynccontextmanager
     async def get_channel_from_remote(
@@ -299,14 +279,15 @@ class RestExecutor(Executor):
         if not channel:
             channel = 'all'
         uri = f'{self.uri}/api/v1/stream/{channel}'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'},
-            stream=True)
-        raise_for_status(response)
+        async with self._httpx_client.stream(
+            "GET", uri, content=data,
+            headers={'Content-Type': 'application/json'}
+        ) as response:
+            response.raise_for_status()
 
-        async with aclosing(
-                self._generate_sse_events(response, task_status)) as aiter:
-            yield aiter
+            async with aclosing(
+                    self._generate_sse_events(response, task_status)) as aiter:
+                yield aiter
 
     async def apply_execute_from_remote(
             self, obj, exclude_self=True, task_status=TASK_STATUS_IGNORED):
@@ -314,14 +295,15 @@ class RestExecutor(Executor):
         data = self.encode(data)
 
         uri = f'{self.uri}/api/v1/stream/execute'
-        response = await self._session.get(
-            uri, data=data, headers={'Content-Type': 'application/json'},
-            stream=True)
-        raise_for_status(response)
+        async with self._httpx_client.stream(
+            "GET", uri, content=data,
+            headers={'Content-Type': 'application/json'}
+        ) as response:
+            response.raise_for_status()
 
-        await self._apply_execute_from_remote(
-            obj, self._generate_sse_events(response, task_status),
-            exclude_self)
+            await self._apply_execute_from_remote(
+                obj, self._generate_sse_events(response, task_status),
+                exclude_self)
 
     async def get_echo_clock(self) -> Tuple[int, int, int]:
         start_time = time.perf_counter_ns()

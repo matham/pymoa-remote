@@ -60,7 +60,7 @@ class MultiprocessSocketExecutor(SocketExecutor):
 
         env = os.environ.copy()
         env['KIVY_NO_ARGS'] = '1'
-        self._process = await trio.open_process(
+        self._process = await trio.lowlevel.open_process(
             [sys.executable, '-m', 'pymoa_remote.app.multiprocessing',
              '--host', str(self.server),
              '--port', str(port),
@@ -100,5 +100,5 @@ class MultiprocessSocketExecutor(SocketExecutor):
 
                 finally:
                     with trio.CancelScope(shield=True):
-                        await self._process.aclose()
+                        await self._process.wait()
                         self._process = None

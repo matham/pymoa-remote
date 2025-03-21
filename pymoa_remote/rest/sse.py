@@ -3,7 +3,6 @@
 
 """
 import re
-from asks.response_objects import StreamResponse
 from typing import AsyncGenerator, Optional, Tuple
 
 __all__ = ('SSEStream', )

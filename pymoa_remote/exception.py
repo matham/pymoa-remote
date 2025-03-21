@@ -42,43 +42,7 @@ def get_fake_traceback_obj(filename, lineno, name, line):
 
     # Build a new code object that points to the template file and
     # replaces the location with a block name.
-
-    # Collect arguments for the new code object. CodeType only
-    # accepts positional arguments, and arguments were inserted in
-    # new Python versions.
-    code_args = []
-
-    for attr in (
-        "argcount",
-        "posonlyargcount",  # Python 3.8
-        "kwonlyargcount",
-        "nlocals",
-        "stacksize",
-        "flags",
-        "code",  # codestring
-        "consts",  # constants
-        "names",
-        "varnames",
-        ("filename", filename),
-        ("name", name),
-        "firstlineno",
-        "lnotab",
-        "freevars",
-        "cellvars",
-    ):
-        if isinstance(attr, tuple):
-            # Replace with given value.
-            code_args.append(attr[1])
-            continue
-
-        try:
-            # Copy original value if it exists.
-            code_args.append(getattr(code, "co_" + attr))
-        except AttributeError:
-            # Some arguments were added later.
-            continue
-
-    code = CodeType(*code_args)
+    code = code.replace(co_name=name)
 
     # Execute the new code, which is guaranteed to raise, and return
     # the new traceback without this frame.

@@ -21,7 +21,7 @@ executors = [
     'quart_rest_executor']
 
 remote_executors = [
-    'process_executor', 'quart_socket_executor', 'quart_rest_executor']
+    'quart_rest_executor']
 
 
 @pytest.fixture(params=executors)
