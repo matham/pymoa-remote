@@ -297,7 +297,7 @@ class SocketExecutor(Executor):
                 last_packet = packet
 
                 ret_data = res['data']
-                assert type(ret_data['data']) == bytes
+                assert type(ret_data['data']) is bytes
                 ret_data['data'] = self.registry.decode_json_buffers_raw(
                     ret_data['data'])
                 yield ret_data
