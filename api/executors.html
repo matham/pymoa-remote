@@ -1,0 +1,867 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Available Executors &mdash; PyMoa-Remote  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+      <script src="../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="PyMoa-Remote Package" href="pymoa_remote.html" />
+    <link rel="prev" title="Executor API" href="client_api.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            PyMoa-Remote
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="api.html">The PyMoa-Remote API</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="client_api.html">Executor API</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Available Executors</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#threading-executor">Threading Executor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor.cancel_nursery"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor.cancel_nursery</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor.execute"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor.execute_generator"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor.execute_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor.get_echo_clock"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor.get_echo_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor.start"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor.stop"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor.stop()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.AsyncThreadExecutor.to_thread_portal"><code class="docutils literal notranslate"><span class="pre">AsyncThreadExecutor.to_thread_portal</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.eof"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.eof</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.execute"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.execute_generator"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.execute_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.get_echo_clock"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.get_echo_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.max_queue_size"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.max_queue_size</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.sleep"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.sleep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.start"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.start()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.SyncThreadExecutor.stop"><code class="docutils literal notranslate"><span class="pre">SyncThreadExecutor.stop()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.apply_config_from_remote"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.apply_config_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.apply_data_from_remote"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.apply_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.apply_execute_from_remote"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.apply_execute_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.apply_property_data_from_remote"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.apply_property_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.delete_remote_instance"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.delete_remote_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.ensure_remote_instance"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.ensure_remote_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.execute"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.execute_generator"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.execute_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.get_channel_from_remote"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.get_channel_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.get_data_from_remote"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.get_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.get_echo_clock"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.get_echo_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.get_remote_object_config"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.get_remote_object_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.get_remote_object_property_data"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.get_remote_object_property_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.get_remote_objects"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.get_remote_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.is_remote"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.is_remote</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.register_remote_class"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.register_remote_class()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.remote_import"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.remote_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.sleep"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.sleep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.start_executor"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.start_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.ThreadExecutor.stop_executor"><code class="docutils literal notranslate"><span class="pre">ThreadExecutor.stop_executor()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.threading.TrioPortal"><code class="docutils literal notranslate"><span class="pre">TrioPortal</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.TrioPortal.run"><code class="docutils literal notranslate"><span class="pre">TrioPortal.run()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.TrioPortal.run_sync"><code class="docutils literal notranslate"><span class="pre">TrioPortal.run_sync()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.threading.TrioPortal.trio_token"><code class="docutils literal notranslate"><span class="pre">TrioPortal.trio_token</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#socket-client">Socket Client</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor"><code class="docutils literal notranslate"><span class="pre">SocketExecutor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.apply_config_from_remote"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.apply_config_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.apply_data_from_remote"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.apply_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.apply_execute_from_remote"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.apply_execute_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.apply_property_data_from_remote"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.apply_property_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.create_socket_context"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.create_socket_context()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.decode"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.decode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.delete_remote_instance"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.delete_remote_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.encode"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.encode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.ensure_remote_instance"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.ensure_remote_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.execute"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.execute_generator"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.execute_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.get_channel_from_remote"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.get_channel_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.get_data_from_remote"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.get_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.get_echo_clock"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.get_echo_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.get_remote_object_config"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.get_remote_object_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.get_remote_object_property_data"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.get_remote_object_property_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.get_remote_objects"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.get_remote_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.open_socket"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.open_socket()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.port"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.port</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.raise_return_value"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.raise_return_value()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.read_decode_json_buffers"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.read_decode_json_buffers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.register_remote_class"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.register_remote_class()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.remote_import"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.remote_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.server"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.server</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.sleep"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.sleep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.socket"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.socket</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.start_executor"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.start_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.stop_executor"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.stop_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.write_socket"><code class="docutils literal notranslate"><span class="pre">SocketExecutor.write_socket()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#multiprocessing-socket-executor">Multiprocessing Socket Executor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.allow_import_from_main"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.allow_import_from_main</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.allow_remote_class_registration"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.allow_remote_class_registration</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.decode"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.decode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.port"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.port</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.server"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.server</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.start_executor"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.start_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.stop_executor"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.stop_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.stream_changes"><code class="docutils literal notranslate"><span class="pre">MultiprocessSocketExecutor.stream_changes</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#websocket-executor">WebSocket Executor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.create_socket_context"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor.create_socket_context()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.decode"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor.decode()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.nursery"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor.nursery</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.open_socket"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor.open_socket()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.read_decode_json_buffers"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor.read_decode_json_buffers()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.socket"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor.socket</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.write_socket"><code class="docutils literal notranslate"><span class="pre">WebSocketExecutor.write_socket()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#rest-executor">REST Executor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor"><code class="docutils literal notranslate"><span class="pre">RestExecutor</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.apply_config_from_remote"><code class="docutils literal notranslate"><span class="pre">RestExecutor.apply_config_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.apply_data_from_remote"><code class="docutils literal notranslate"><span class="pre">RestExecutor.apply_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.apply_execute_from_remote"><code class="docutils literal notranslate"><span class="pre">RestExecutor.apply_execute_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.apply_property_data_from_remote"><code class="docutils literal notranslate"><span class="pre">RestExecutor.apply_property_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.delete_remote_instance"><code class="docutils literal notranslate"><span class="pre">RestExecutor.delete_remote_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.ensure_remote_instance"><code class="docutils literal notranslate"><span class="pre">RestExecutor.ensure_remote_instance()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.execute"><code class="docutils literal notranslate"><span class="pre">RestExecutor.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.execute_generator"><code class="docutils literal notranslate"><span class="pre">RestExecutor.execute_generator()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.get_channel_from_remote"><code class="docutils literal notranslate"><span class="pre">RestExecutor.get_channel_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.get_data_from_remote"><code class="docutils literal notranslate"><span class="pre">RestExecutor.get_data_from_remote()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.get_echo_clock"><code class="docutils literal notranslate"><span class="pre">RestExecutor.get_echo_clock()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.get_remote_object_config"><code class="docutils literal notranslate"><span class="pre">RestExecutor.get_remote_object_config()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.get_remote_object_property_data"><code class="docutils literal notranslate"><span class="pre">RestExecutor.get_remote_object_property_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.get_remote_objects"><code class="docutils literal notranslate"><span class="pre">RestExecutor.get_remote_objects()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.register_remote_class"><code class="docutils literal notranslate"><span class="pre">RestExecutor.register_remote_class()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.remote_import"><code class="docutils literal notranslate"><span class="pre">RestExecutor.remote_import()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.sleep"><code class="docutils literal notranslate"><span class="pre">RestExecutor.sleep()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.start_executor"><code class="docutils literal notranslate"><span class="pre">RestExecutor.start_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.stop_executor"><code class="docutils literal notranslate"><span class="pre">RestExecutor.stop_executor()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pymoa_remote.rest.client.RestExecutor.uri"><code class="docutils literal notranslate"><span class="pre">RestExecutor.uri</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="pymoa_remote.html">PyMoa-Remote Package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="app/api.html">Remote Server Apps</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyMoa-Remote</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="api.html">The PyMoa-Remote API</a></li>
+      <li class="breadcrumb-item active">Available Executors</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/api/executors.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-pymoa_remote.threading">
+<span id="available-executors"></span><h1>Available Executors<a class="headerlink" href="#module-pymoa_remote.threading" title="Link to this heading"></a></h1>
+<section id="threading-executor">
+<h2>Threading Executor<a class="headerlink" href="#threading-executor" title="Link to this heading"></a></h2>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.threading.</span></span><span class="sig-name descname"><span class="pre">AsyncThreadExecutor</span></span><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Executor that executes async functions in a trio event loop in a
+secondary thread.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor.cancel_nursery">
+<span class="sig-name descname"><span class="pre">cancel_nursery</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-core.html#trio.Nursery" title="(in Trio v0.29.0)"><span class="pre">Nursery</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor.cancel_nursery" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor.execute">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">async_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor.execute" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor.execute_generator">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">execute_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync_gen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncGenerator</span></span></span><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor.execute_generator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor.get_echo_clock">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_echo_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor.get_echo_clock" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor.start">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'AsyncThreadExecutor'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor.start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor.stop">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor.stop" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.threading.AsyncThreadExecutor.to_thread_portal">
+<span class="sig-name descname"><span class="pre">to_thread_portal</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pymoa_remote.threading.TrioPortal" title="pymoa_remote.threading.TrioPortal"><span class="pre">TrioPortal</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.threading.AsyncThreadExecutor.to_thread_portal" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.threading.</span></span><span class="sig-name descname"><span class="pre">SyncThreadExecutor</span></span><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Executor that executes functions in a secondary thread.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.eof">
+<span class="sig-name descname"><span class="pre">eof</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;object</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.eof" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.execute">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync_fn</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.execute" title="Link to this definition"></a></dt>
+<dd><p>It’s guaranteed sequential.
+TODO: if called after stop or thread exited it may block forever.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.execute_generator">
+<em class="property"><span class="pre">async</span> <span class="pre">for</span> <span class="pre">...</span> <span class="pre">in</span> </em><span class="sig-name descname"><span class="pre">execute_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sync_gen</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncGenerator</span></span></span><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.execute_generator" title="Link to this definition"></a></dt>
+<dd><p>Last items may be dropped after getting them.
+TODO: if called after stop is called it may block forever.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.get_echo_clock">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_echo_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.get_echo_clock" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.max_queue_size">
+<span class="sig-name descname"><span class="pre">max_queue_size</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">10</span></em><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.max_queue_size" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.sleep">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deadline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.sleep" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.start">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">start</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ThreadExecutor'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.start" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.SyncThreadExecutor.stop">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">stop</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.SyncThreadExecutor.stop" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.threading.</span></span><span class="sig-name descname"><span class="pre">ThreadExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="client_api.html#pymoa_remote.client.Executor" title="pymoa_remote.client.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.apply_config_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_config_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.apply_config_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.apply_data_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.apply_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.apply_execute_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_execute_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_self</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.apply_execute_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.apply_property_data_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_property_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.apply_property_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.delete_remote_instance">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">delete_remote_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.delete_remote_instance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.ensure_remote_instance">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">ensure_remote_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_register_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.ensure_remote_instance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.execute">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.execute" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.execute_generator">
+<em class="property"><span class="pre">async</span> <span class="pre">for</span> <span class="pre">...</span> <span class="pre">in</span> </em><span class="sig-name descname"><span class="pre">execute_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncGenerator</span></span></span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.execute_generator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.get_channel_from_remote">
+<em class="property"><span class="pre">async</span> <span class="pre">with</span> </em><span class="sig-name descname"><span class="pre">get_channel_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hash_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">AsyncGenerator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.get_channel_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.get_data_from_remote">
+<em class="property"><span class="pre">async</span> <span class="pre">with</span> </em><span class="sig-name descname"><span class="pre">get_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">AsyncGenerator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.get_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.get_echo_clock">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_echo_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.get_echo_clock" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.get_remote_object_config">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_object_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.get_remote_object_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.get_remote_object_property_data">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_object_property_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.get_remote_object_property_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.get_remote_objects">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.get_remote_objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.is_remote">
+<span class="sig-name descname"><span class="pre">is_remote</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.is_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.register_remote_class">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">register_remote_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.register_remote_class" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.remote_import">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">remote_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.remote_import" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.sleep">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deadline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.sleep" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.start_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">start_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.start_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.ThreadExecutor.stop_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">stop_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.ThreadExecutor.stop_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.threading.TrioPortal">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.threading.</span></span><span class="sig-name descname"><span class="pre">TrioPortal</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">trio_token</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.TrioPortal" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Portal for communicating with trio from a different thread.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.TrioPortal.run">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">afn</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.TrioPortal.run" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.threading.TrioPortal.run_sync">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">run_sync</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fn</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.threading.TrioPortal.run_sync" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.threading.TrioPortal.trio_token">
+<span class="sig-name descname"><span class="pre">trio_token</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-lowlevel.html#trio.lowlevel.TrioToken" title="(in Trio v0.29.0)"><span class="pre">TrioToken</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.threading.TrioPortal.trio_token" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<section id="socket-client">
+<span id="module-pymoa_remote.socket.client"></span><h2>Socket Client<a class="headerlink" href="#socket-client" title="Link to this heading"></a></h2>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.socket.client.</span></span><span class="sig-name descname"><span class="pre">SocketExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="client_api.html#pymoa_remote.client.Executor" title="pymoa_remote.client.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a></p>
+<p>Executor that sends all requests to a remote server to be executed
+there, using a socket.</p>
+<p>Each request is sent as a dict with metadata. Typically, it’ll have a
+<code class="docutils literal notranslate"><span class="pre">data</span></code> key that contains the request data dict. This data is generated
+by the corresponding private methods in
+<a class="reference internal" href="client_api.html#pymoa_remote.client.Executor" title="pymoa_remote.client.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a>..</p>
+<p>The socket is opened with <a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.create_socket_context" title="pymoa_remote.socket.client.SocketExecutor.create_socket_context"><code class="xref py py-meth docutils literal notranslate"><span class="pre">create_socket_context()</span></code></a> or
+<a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.open_socket" title="pymoa_remote.socket.client.SocketExecutor.open_socket"><code class="xref py py-meth docutils literal notranslate"><span class="pre">open_socket()</span></code></a>. Data is written with <a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.write_socket" title="pymoa_remote.socket.client.SocketExecutor.write_socket"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write_socket()</span></code></a> and
+encoded with <a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.encode" title="pymoa_remote.socket.client.SocketExecutor.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code></a>. It is read and decoded with
+<a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.read_decode_json_buffers" title="pymoa_remote.socket.client.SocketExecutor.read_decode_json_buffers"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read_decode_json_buffers()</span></code></a>. All client requests use this basic API.</p>
+<p>Normal methods cannot be canceled because there’s no mechanism. Data
+streams and the generator can be canceled since they have their own socket</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.apply_config_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_config_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.apply_config_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.apply_data_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.apply_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.apply_execute_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_execute_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_self</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.apply_execute_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.apply_property_data_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_property_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.apply_property_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.create_socket_context">
+<span class="sig-name descname"><span class="pre">create_socket_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncContextManager</span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.create_socket_context" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.decode">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.decode" title="Link to this definition"></a></dt>
+<dd><p>Decodes the data encoded with <a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor.encode" title="pymoa_remote.socket.client.SocketExecutor.encode"><code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.delete_remote_instance">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">delete_remote_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.delete_remote_instance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.encode">
+<span class="sig-name descname"><span class="pre">encode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bytes</span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.encode" title="Link to this definition"></a></dt>
+<dd><p>Encodes the data as required by the specific executor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.ensure_remote_instance">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">ensure_remote_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_register_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.ensure_remote_instance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.execute">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.execute" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.execute_generator">
+<em class="property"><span class="pre">async</span> <span class="pre">for</span> <span class="pre">...</span> <span class="pre">in</span> </em><span class="sig-name descname"><span class="pre">execute_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncGenerator</span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.execute_generator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.get_channel_from_remote">
+<em class="property"><span class="pre">async</span> <span class="pre">with</span> </em><span class="sig-name descname"><span class="pre">get_channel_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hash_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">AsyncGenerator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.get_channel_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.get_data_from_remote">
+<em class="property"><span class="pre">async</span> <span class="pre">with</span> </em><span class="sig-name descname"><span class="pre">get_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">AsyncGenerator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.get_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.get_echo_clock">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_echo_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.get_echo_clock" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.get_remote_object_config">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_object_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.get_remote_object_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.get_remote_object_property_data">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_object_property_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.get_remote_object_property_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.get_remote_objects">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.get_remote_objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.open_socket">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">open_socket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-io.html#trio.SocketStream" title="(in Trio v0.29.0)"><span class="pre">SocketStream</span></a></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.open_socket" title="Link to this definition"></a></dt>
+<dd><p>Opens socket, sends channel=None, reads the response and returns
+the socket stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.port">
+<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.port" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.raise_return_value">
+<span class="sig-name descname"><span class="pre">raise_return_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">packet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.raise_return_value" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.read_decode_json_buffers">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">read_decode_json_buffers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-io.html#trio.SocketStream" title="(in Trio v0.29.0)"><span class="pre">SocketStream</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.read_decode_json_buffers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.register_remote_class">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">register_remote_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.register_remote_class" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.remote_import">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">remote_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.remote_import" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.server">
+<span class="sig-name descname"><span class="pre">server</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.server" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.sleep">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deadline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.sleep" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.socket">
+<span class="sig-name descname"><span class="pre">socket</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-io.html#trio.SocketStream" title="(in Trio v0.29.0)"><span class="pre">SocketStream</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.socket" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.start_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">start_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.start_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.stop_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">stop_executor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.stop_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.client.SocketExecutor.write_socket">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">write_socket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sock</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-io.html#trio.SocketStream" title="(in Trio v0.29.0)"><span class="pre">SocketStream</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.client.SocketExecutor.write_socket" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<section id="multiprocessing-socket-executor">
+<span id="module-pymoa_remote.socket.multiprocessing_client"></span><h2>Multiprocessing Socket Executor<a class="headerlink" href="#multiprocessing-socket-executor" title="Link to this heading"></a></h2>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.socket.multiprocessing_client.</span></span><span class="sig-name descname"><span class="pre">MultiprocessSocketExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">server</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'localhost'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream_changes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_remote_class_registration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">allow_import_from_main</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor" title="pymoa_remote.socket.client.SocketExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">SocketExecutor</span></code></a></p>
+<p>Executor that sends all requests to a remote server to be executed
+there, using a websocket.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.allow_import_from_main">
+<span class="sig-name descname"><span class="pre">allow_import_from_main</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.allow_import_from_main" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.allow_remote_class_registration">
+<span class="sig-name descname"><span class="pre">allow_remote_class_registration</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.allow_remote_class_registration" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.decode">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.decode" title="Link to this definition"></a></dt>
+<dd><p>Decodes the data encoded with <code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.port">
+<span class="sig-name descname"><span class="pre">port</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.port" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.server">
+<span class="sig-name descname"><span class="pre">server</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.server" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.start_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">start_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.start_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.stop_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">stop_executor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">block</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.stop_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.stream_changes">
+<span class="sig-name descname"><span class="pre">stream_changes</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#pymoa_remote.socket.multiprocessing_client.MultiprocessSocketExecutor.stream_changes" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<section id="websocket-executor">
+<span id="module-pymoa_remote.socket.websocket_client"></span><h2>WebSocket Executor<a class="headerlink" href="#websocket-executor" title="Link to this heading"></a></h2>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.socket.websocket_client.</span></span><span class="sig-name descname"><span class="pre">WebSocketExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nursery</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-core.html#trio.Nursery" title="(in Trio v0.29.0)"><span class="pre">Nursery</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#pymoa_remote.socket.client.SocketExecutor" title="pymoa_remote.socket.client.SocketExecutor"><code class="xref py py-class docutils literal notranslate"><span class="pre">SocketExecutor</span></code></a></p>
+<p>Executor that sends all requests to a remote server to be executed
+there, using a websocket.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor.create_socket_context">
+<span class="sig-name descname"><span class="pre">create_socket_context</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.create_socket_context" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor.decode">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">decode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.decode" title="Link to this definition"></a></dt>
+<dd><p>Decodes the data encoded with <code class="xref py py-meth docutils literal notranslate"><span class="pre">encode()</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor.nursery">
+<span class="sig-name descname"><span class="pre">nursery</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://trio.readthedocs.io/en/stable/reference-core.html#trio.Nursery" title="(in Trio v0.29.0)"><span class="pre">Nursery</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.nursery" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor.open_socket">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">open_socket</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">WebSocketConnection</span></span></span><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.open_socket" title="Link to this definition"></a></dt>
+<dd><p>Opens socket, sends channel=None, reads the response and returns
+the socket stream.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor.read_decode_json_buffers">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">read_decode_json_buffers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">WebSocketConnection</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.read_decode_json_buffers" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor.socket">
+<span class="sig-name descname"><span class="pre">socket</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">WebSocketConnection</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.socket" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.socket.websocket_client.WebSocketExecutor.write_socket">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">write_socket</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bytes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">WebSocketConnection</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.socket.websocket_client.WebSocketExecutor.write_socket" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<section id="rest-executor">
+<span id="module-pymoa_remote.rest.client"></span><h2>REST Executor<a class="headerlink" href="#rest-executor" title="Link to this heading"></a></h2>
+</section>
+<dl class="py class">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pymoa_remote.rest.client.</span></span><span class="sig-name descname"><span class="pre">RestExecutor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">uri</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="client_api.html#pymoa_remote.client.Executor" title="pymoa_remote.client.Executor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Executor</span></code></a></p>
+<p>Executor that sends all requests to a remote server to be executed
+there, using a rest API.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.apply_config_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_config_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.apply_config_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.apply_data_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.apply_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.apply_execute_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_execute_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exclude_self</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.apply_execute_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.apply_property_data_from_remote">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">apply_property_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.apply_property_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.delete_remote_instance">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">delete_remote_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.delete_remote_instance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.ensure_remote_instance">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">ensure_remote_instance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hash_name</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">auto_register_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.ensure_remote_instance" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.execute">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">execute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fn</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.execute" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.execute_generator">
+<em class="property"><span class="pre">async</span> <span class="pre">for</span> <span class="pre">...</span> <span class="pre">in</span> </em><span class="sig-name descname"><span class="pre">execute_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">callback</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncGenerator</span></span></span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.execute_generator" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.get_channel_from_remote">
+<em class="property"><span class="pre">async</span> <span class="pre">with</span> </em><span class="sig-name descname"><span class="pre">get_channel_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hash_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">channel</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">AsyncGenerator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.get_channel_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.get_data_from_remote">
+<em class="property"><span class="pre">async</span> <span class="pre">with</span> </em><span class="sig-name descname"><span class="pre">get_data_from_remote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trigger_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">triggered_logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logged_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">task_status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">TASK_STATUS_IGNORED</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">AsyncContextManager</span><span class="p"><span class="pre">[</span></span><span class="pre">AsyncGenerator</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.get_data_from_remote" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.get_echo_clock">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_echo_clock</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.get_echo_clock" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.get_remote_object_config">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_object_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.get_remote_object_config" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.get_remote_object_property_data">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_object_property_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.get_remote_object_property_data" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.get_remote_objects">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">get_remote_objects</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.get_remote_objects" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.register_remote_class">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">register_remote_class</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.register_remote_class" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.remote_import">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">remote_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">module</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.remote_import" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.sleep">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">sleep</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">deadline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.sleep" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.start_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">start_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.start_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.stop_executor">
+<em class="property"><span class="pre">await</span> </em><span class="sig-name descname"><span class="pre">stop_executor</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.stop_executor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pymoa_remote.rest.client.RestExecutor.uri">
+<span class="sig-name descname"><span class="pre">uri</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">''</span></em><a class="headerlink" href="#pymoa_remote.rest.client.RestExecutor.uri" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="client_api.html" class="btn btn-neutral float-left" title="Executor API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pymoa_remote.html" class="btn btn-neutral float-right" title="PyMoa-Remote Package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2020, Matthew Einhorn.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
